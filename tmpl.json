@@ -1,0 +1,14 @@
+{
+  "workflow_name": "test-workflow",
+  "data_set_id": "HRI107",
+  "operation": "std-dev"
+},
+
+
+{
+		"workflow_name": "test-workflow",
+		"data_set_id": "HRI107",
+		"operation": "std-dev",
+		"PID": 1,
+		"other_cardinals": [(2, 23.45.67.89), (3, 34.56.78.90)]
+	}
