@@ -1,4 +1,4 @@
-import request
+import requests
 from flask import Flask, json, request
 from mockDB import DB
 from templates import *
@@ -18,8 +18,8 @@ def compute():
         try:
             request_data = request.get_json()
             comp_details = parse_computatuon_request(request_data)
-        except Exception e:
-            return f'ERROR: Request incomplete or improperly formatted: {e}'
+        except Exception:
+            return 'ERROR: Request incomplete or improperly formatted'
         #TODO return computation ID and start computation asynchronously
         return orchestrate_computation(comp_details)
     # otherwise handle the GET request
@@ -30,15 +30,15 @@ def compute():
 def orchestrate_computation(computation_settings):
     # GET IP addresses for dataset owners
     cardinals = request_data_owners(computation_id['data_set_id']) # should be a call to postgres or mysql
-     for PID, IP in cardinals:
+    for PID, IP in cardinals:
          payload = {
                  "workflow_name": computation_settings['workflow_name'],
                  "data_set_id": computation_settings['data_set_id'],
                  "operation": computation_settings['operation'],
                  "PID": PID,
-                 "other_cardinals": [x in cardinals if not x == (PID, IP)]
+                 "other_cardinals": [x for x in cardinals if not x == (PID, IP)]
                  }
-       request.post(IP, payload)
+         request.post(IP, payload)
     return 'computation started'
 
 def parse_computatuon_request(request_data):
