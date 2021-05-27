@@ -2,3 +2,4 @@ venv/
 src/__pycache__/
 ./venv
 *.swp
+.idea
