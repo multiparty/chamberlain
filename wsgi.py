@@ -32,7 +32,8 @@ def index():
 @app.route("/api/submit", methods=["POST"])
 def submit():
 
-    if request.method == "POST":
+    # handle the POST request
+    if request.method == 'POST':
         """
         Request format:
         {
@@ -43,15 +44,21 @@ def submit():
             "operation": "std-dev"
         }
         """
-    # handle the POST request
-    if request.method == 'POST':
         try:
             request_data = request.get_json()
             comp_details = parse_computation_request(request_data)
+            # TODO return computation ID and start computation asynchronously
+            msg = orchestrate_computation(comp_details, cardinal_DB)
+            response = {"MSG": msg}
         except Exception as e:
-            return f'ERROR: {e}'
-        # TODO return computation ID and start computation asynchronously
-        return orchestrate_computation(comp_details, cardinal_DB)
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
     # otherwise handle the GET request
     else:
         return show_computation_form()
