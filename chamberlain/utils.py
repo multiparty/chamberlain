@@ -8,6 +8,7 @@ def orchestrate_computation(computation_settings, cardinal_DB):
     # GET IP addresses for dataset owners
     # TODO: make this a call to postgres or mysql
     cardinals = request_data_owners(computation_settings['dataset_id'], cardinal_DB)
+
     PID1, IP1 = cardinals[0]
     payload = {
         "workflow_name": computation_settings['workflow_name'],
@@ -17,7 +18,7 @@ def orchestrate_computation(computation_settings, cardinal_DB):
         "other_cardinals": [x for x in cardinals if not x == (PID1, IP1)],
     }
     # instruct cardinal to start jiff server
-    r = requests.post(IP1 + '/api/start_jiff_server', json.dumps(payload), timeout=1)
+    r = requests.post(IP1 + '/api/start_jiff_server', json.dumps(payload),timeout=10)
     # print('TEXT --> ', r.text)
     if r.status_code != 200:
         error = r.json()

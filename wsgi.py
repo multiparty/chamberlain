@@ -99,7 +99,7 @@ def handle_workflow_req():
     # otherwise handle the GET request
     elif request.method == "GET":
         try:
-            workflows = cardinal_DB.get_workflows(mysql_db)
+            workflows = cardinal_DB.get_workflows()
             response = {
                 "workflows":workflows
             } 
@@ -566,4 +566,4 @@ if __name__ != "__main__":
 if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="127.0.0.1", port=port, debug=True)
