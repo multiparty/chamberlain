@@ -5,7 +5,7 @@ from flask import request
 from flask import jsonify
 from flask_cors import CORS
 
-from chamberlain.mockDB import DB
+from chamberlain.DB import DB
 from chamberlain.templates import *
 from chamberlain.utils import *
 
