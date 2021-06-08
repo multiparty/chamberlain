@@ -5,26 +5,15 @@ from flask import request
 from flask import jsonify
 from flask_cors import CORS
 
-from flask_mysqldb import MySQL
-from dotenv import load_dotenv
-
 from chamberlain.mockDB import DB
 from chamberlain.templates import *
 from chamberlain.utils import *
 
-cardinal_DB = DB()
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# set config for database
-load_dotenv()
-app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST')
-app.config['MYSQL_PORT'] = int(os.environ.get('MYSQL_PORT'))
-app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD')
-app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB')
-# initialize mysql client
-mysql = MySQL(app)
+# initialize database class
+cardinal_DB = DB() 
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -52,7 +41,7 @@ def submit():
             "workflow_name": "test-workflow",
             "party_count": 3,
             "party_list": [1,2,3],
-            "data_set_id": "HRI107",
+            "dataset_id": "HRI107",
             "operation": "std-dev"
         }
         """
@@ -93,7 +82,7 @@ def handle_workflow_req():
         """
         try:
             request_data = request.get_json()
-            response_msg = insert_workflow(mysql,request_data)
+            response_msg = cardinal_DB.insert_workflow(request_data)
             response = {
                 "MSG": response_msg
             }
@@ -110,7 +99,7 @@ def handle_workflow_req():
     # otherwise handle the GET request
     elif request.method == "GET":
         try:
-            workflows = get_workflows(mysql)
+            workflows = cardinal_DB.get_workflows(mysql_db)
             response = {
                 "workflows":workflows
             } 
@@ -131,7 +120,7 @@ def handle_workflow_id_req(id):
     # handle the GET request
     if request.method == 'GET':
         try:
-            workflow = get_workflow_id(mysql,id)
+            workflow = cardinal_DB.get_workflow_id(id)
             response = {
                 "workflow": workflow
             }
@@ -148,7 +137,7 @@ def handle_workflow_id_req(id):
     # otherwise handle the DELETE request
     elif request.method == "DELETE":
         try:
-            response_msg = delete_workflow(mysql,id)
+            response_msg = cardinal_DB.delete_workflow(id)
             response = {
                 "MSG":response_msg
             } 
@@ -179,7 +168,7 @@ def handle_dataset_req():
         """
         try:
             request_data = request.get_json()
-            response_msg = insert_dataset(mysql,request_data)
+            response_msg = cardinal_DB.insert_dataset(request_data)
             response = {
                 "MSG": response_msg
             }
@@ -197,7 +186,7 @@ def handle_dataset_req():
     # otherwise handle the GET request
     elif request.method == "GET":
         try:
-            datasets = get_datasets(mysql)
+            datasets = cardinal_DB.get_datasets()
             response = {
                 "datasets":datasets
             } 
@@ -223,7 +212,7 @@ def handle_dataset_req():
         """
         try:
             request_data = request.get_json()
-            response_msg = modify_dataset(mysql,request_data)
+            response_msg = cardinal_DB.modify_dataset(request_data)
             response = {
                 "MSG": response_msg
             }
@@ -244,7 +233,7 @@ def handle_dataset_id_req(id):
     # handle the GET request
     if request.method == 'GET':
         try:
-            dataset = get_dataset_id(mysql,id)
+            dataset = cardinal_DB.get_dataset_id(id)
             response = {
                 "dataset": dataset
             }
@@ -261,7 +250,7 @@ def handle_dataset_id_req(id):
     # otherwise handle the DELETE request
     elif request.method == "DELETE":
         try:
-            response_msg = delete_dataset(mysql,id)
+            response_msg = cardinal_DB.delete_dataset(id)
             response = {
                 "MSG":response_msg
             } 
@@ -291,7 +280,7 @@ def handle_cardinal_req():
         """
         try:
             request_data = request.get_json()
-            response_msg = insert_cardinal(mysql,request_data)
+            response_msg = cardinal_DB.insert_cardinal(request_data)
             response = {
                 "MSG": response_msg
             }
@@ -309,7 +298,7 @@ def handle_cardinal_req():
     # otherwise handle the GET request
     elif request.method == "GET":
         try:
-            cardinals = get_cardinals(mysql)
+            cardinals = cardinal_DB.get_cardinals()
             response = {
                 "cardinals":cardinals
             } 
@@ -335,7 +324,7 @@ def handle_cardinal_req():
         """
         try:
             request_data = request.get_json()
-            response_msg = modify_cardinal(mysql,request_data)
+            response_msg = cardinal_DB.modify_cardinal(request_data)
             response = {
                 "MSG": response_msg
             }
@@ -356,7 +345,7 @@ def handle_cardinal_id_req(id):
     # handle the GET request
     if request.method == 'GET':
         try:
-            cardinal = get_cardinal_id(mysql,id)
+            cardinal = cardinal_DB.get_cardinal_id(id)
             response = {
                 "cardinal": cardinal
             }
@@ -373,7 +362,7 @@ def handle_cardinal_id_req(id):
     # otherwise handle the DELETE request
     elif request.method == "DELETE":
         try:
-            response_msg = delete_cardinal(mysql,id)
+            response_msg = cardinal_DB.delete_cardinal(id)
             response = {
                 "MSG":response_msg
             } 
@@ -404,7 +393,7 @@ def handle_workflow_relationship_req():
         """
         try:
             request_data = request.get_json()
-            response_msg = insert_workflow_relationship(mysql,request_data)
+            response_msg = cardinal_DB.insert_workflow_relationship(request_data)
             response = {
                 "MSG": response_msg
             }
@@ -422,7 +411,7 @@ def handle_workflow_relationship_req():
     # otherwise handle the GET request
     elif request.method == "GET":
         try:
-            workflow_relationships = get_workflow_relationships(mysql)
+            workflow_relationships = cardinal_DB.get_workflow_relationships()
             response = {
                 "workflow_relationships":workflow_relationships
             } 
@@ -444,7 +433,7 @@ def handle_workflow_relationship_id_req(id):
     # handle the GET request
     if request.method == 'GET':
         try:
-            workflow_relationship = get_workflow_relationship_id(mysql,id)
+            workflow_relationship = cardinal_DB.get_workflow_relationship_id(id)
             response = {
                 "workflow_relationship": workflow_relationship
             }
@@ -461,7 +450,7 @@ def handle_workflow_relationship_id_req(id):
     # otherwise handle the DELETE request
     elif request.method == "DELETE":
         try:
-            response_msg = delete_workflow_relationship(mysql,id)
+            response_msg = cardinal_DB.delete_workflow_relationship(id)
             response = {
                 "MSG":response_msg
             } 
@@ -477,6 +466,96 @@ def handle_workflow_relationship_id_req(id):
         return jsonify(response)
 
 
+## Storage Relationship endpoints
+@app.route("/api/storage-relationship", methods=["POST","GET"])
+def handle_storage_relationship_req():
+
+    # handle the POST request
+    if request.method == 'POST':
+        """
+            Request format:
+            {
+                "storageRelationshipId":"ST104",
+                "datasetId": "HRI007",
+                "cardinalId1":"cardinal023",
+                "cardinalId2":"caridnal541",
+                "cardinalId3":"cardinal346"
+            }
+        """
+        try:
+            request_data = request.get_json()
+            response_msg = cardinal_DB.insert_storage_relationship(request_data)
+            response = {
+                "MSG": response_msg
+            }
+            
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+    # otherwise handle the GET request
+    elif request.method == "GET":
+        try:
+            storage_relationships = cardinal_DB.get_storage_relationships()
+            response = {
+                "storage_relationships":storage_relationships
+            } 
+            
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+
+@app.route("/api/storage-relationship/<id>", methods=["GET","DELETE"])
+def handle_storage_relationship_id_req(id):
+
+    # handle the GET request
+    if request.method == 'GET':
+        try:
+            storage_relationship = cardinal_DB.get_storage_relationship_id(id)
+            response = {
+                "storage_relationship": storage_relationship
+            }
+            
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+    # otherwise handle the DELETE request
+    elif request.method == "DELETE":
+        try:
+            response_msg = cardinal_DB.delete_storage_relationship(id)
+            response = {
+                "MSG":response_msg
+            } 
+            
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
 if __name__ != "__main__":
 
     gunicorn_logger = logging.getLogger("gunicorn.error")
@@ -487,5 +566,4 @@ if __name__ != "__main__":
 if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 8080))
-    ## TODO Change the host ip back to 0.0.0.0 before committing
-    app.run(host="127.0.0.1", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
