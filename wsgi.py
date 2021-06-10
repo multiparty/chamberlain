@@ -13,7 +13,8 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # initialize database class
-cardinal_DB = DB() 
+cardinal_DB = DB()
+
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -65,10 +66,14 @@ def submit():
         return show_computation_form()
 
 
-# Chamberlain dataset CRUD endpoints
+# ################# #
+# DB CRUD ENDPOINTS #
+# ################# #
 
-## Workflow endpoints
-@app.route("/api/workflow", methods=["POST","GET"])
+# -------------- #
+# WORKFLOW TABLE #
+# -------------- #
+@app.route("/api/workflow", methods=["POST", "GET"])
 def handle_workflow_req():
 
     # handle the POST request
@@ -86,7 +91,7 @@ def handle_workflow_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -101,9 +106,9 @@ def handle_workflow_req():
         try:
             workflows = cardinal_DB.get_workflows()
             response = {
-                "workflows":workflows
-            } 
-            
+                "workflows": workflows
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -114,7 +119,8 @@ def handle_workflow_req():
 
         return jsonify(response)
 
-@app.route("/api/workflow/<id>", methods=["GET","DELETE"])
+
+@app.route("/api/workflow/<id>", methods=["GET", "DELETE"])
 def handle_workflow_id_req(id):
 
     # handle the GET request
@@ -124,7 +130,7 @@ def handle_workflow_id_req(id):
             response = {
                 "workflow": workflow
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -139,9 +145,9 @@ def handle_workflow_id_req(id):
         try:
             response_msg = cardinal_DB.delete_workflow(id)
             response = {
-                "MSG":response_msg
-            } 
-            
+                "MSG": response_msg
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -152,8 +158,11 @@ def handle_workflow_id_req(id):
 
         return jsonify(response)
 
-## Dataset endpoints
-@app.route("/api/dataset", methods=["POST","GET","PUT"])
+
+# ------------- #
+# DATASET TABLE #
+# ------------- #
+@app.route("/api/dataset", methods=["POST", "GET", "PUT"])
 def handle_dataset_req():
 
     # handle the POST request
@@ -172,7 +181,7 @@ def handle_dataset_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -188,9 +197,9 @@ def handle_dataset_req():
         try:
             datasets = cardinal_DB.get_datasets()
             response = {
-                "datasets":datasets
-            } 
-            
+                "datasets": datasets
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -216,7 +225,7 @@ def handle_dataset_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -227,7 +236,8 @@ def handle_dataset_req():
 
         return jsonify(response)
 
-@app.route("/api/dataset/<id>", methods=["GET","DELETE"])
+
+@app.route("/api/dataset/<id>", methods=["GET", "DELETE"])
 def handle_dataset_id_req(id):
 
     # handle the GET request
@@ -237,7 +247,7 @@ def handle_dataset_id_req(id):
             response = {
                 "dataset": dataset
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -252,9 +262,9 @@ def handle_dataset_id_req(id):
         try:
             response_msg = cardinal_DB.delete_dataset(id)
             response = {
-                "MSG":response_msg
-            } 
-            
+                "MSG": response_msg
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -265,8 +275,10 @@ def handle_dataset_id_req(id):
 
         return jsonify(response)
 
-## Cardinal endpoints
-@app.route("/api/cardinal", methods=["POST","GET","PUT"])
+# -------------- #
+# CARDINAL TABLE #
+# -------------- #
+@app.route("/api/cardinal", methods=["POST", "GET", "PUT"])
 def handle_cardinal_req():
 
     # handle the POST request
@@ -284,7 +296,7 @@ def handle_cardinal_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -300,9 +312,9 @@ def handle_cardinal_req():
         try:
             cardinals = cardinal_DB.get_cardinals()
             response = {
-                "cardinals":cardinals
-            } 
-            
+                "cardinals": cardinals
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -328,7 +340,7 @@ def handle_cardinal_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -339,7 +351,8 @@ def handle_cardinal_req():
 
         return jsonify(response)
 
-@app.route("/api/cardinal/<id>", methods=["GET","DELETE"])
+
+@app.route("/api/cardinal/<id>", methods=["GET", "DELETE"])
 def handle_cardinal_id_req(id):
 
     # handle the GET request
@@ -349,7 +362,7 @@ def handle_cardinal_id_req(id):
             response = {
                 "cardinal": cardinal
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -364,9 +377,9 @@ def handle_cardinal_id_req(id):
         try:
             response_msg = cardinal_DB.delete_cardinal(id)
             response = {
-                "MSG":response_msg
-            } 
-            
+                "MSG": response_msg
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -377,8 +390,11 @@ def handle_cardinal_id_req(id):
 
         return jsonify(response)
 
-## Workflow Relationship endpoints
-@app.route("/api/workflow-relationship", methods=["POST","GET"])
+
+# ---------------------------- #
+# WORKFLOW_RELATIONSHIPS TABLE #
+# ---------------------------- #
+@app.route("/api/workflow-relationship", methods=["POST", "GET"])
 def handle_workflow_relationship_req():
 
     # handle the POST request
@@ -397,7 +413,7 @@ def handle_workflow_relationship_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -413,9 +429,9 @@ def handle_workflow_relationship_req():
         try:
             workflow_relationships = cardinal_DB.get_workflow_relationships()
             response = {
-                "workflow_relationships":workflow_relationships
-            } 
-            
+                "workflow_relationships": workflow_relationships
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -427,7 +443,7 @@ def handle_workflow_relationship_req():
         return jsonify(response)
 
 
-@app.route("/api/workflow-relationship/<id>", methods=["GET","DELETE"])
+@app.route("/api/workflow-relationship/<id>", methods=["GET", "DELETE"])
 def handle_workflow_relationship_id_req(id):
 
     # handle the GET request
@@ -437,7 +453,7 @@ def handle_workflow_relationship_id_req(id):
             response = {
                 "workflow_relationship": workflow_relationship
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -452,9 +468,9 @@ def handle_workflow_relationship_id_req(id):
         try:
             response_msg = cardinal_DB.delete_workflow_relationship(id)
             response = {
-                "MSG":response_msg
-            } 
-            
+                "MSG": response_msg
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -466,8 +482,10 @@ def handle_workflow_relationship_id_req(id):
         return jsonify(response)
 
 
-## Storage Relationship endpoints
-@app.route("/api/storage-relationship", methods=["POST","GET"])
+# --------------------------- #
+# STORAGE_RELATIONSHIPS TABLE #
+# --------------------------- #
+@app.route("/api/storage-relationship", methods=["POST", "GET"])
 def handle_storage_relationship_req():
 
     # handle the POST request
@@ -488,7 +506,7 @@ def handle_storage_relationship_req():
             response = {
                 "MSG": response_msg
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -504,9 +522,9 @@ def handle_storage_relationship_req():
         try:
             storage_relationships = cardinal_DB.get_storage_relationships()
             response = {
-                "storage_relationships":storage_relationships
-            } 
-            
+                "storage_relationships": storage_relationships
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -518,7 +536,7 @@ def handle_storage_relationship_req():
         return jsonify(response)
 
 
-@app.route("/api/storage-relationship/<id>", methods=["GET","DELETE"])
+@app.route("/api/storage-relationship/<id>", methods=["GET", "DELETE"])
 def handle_storage_relationship_id_req(id):
 
     # handle the GET request
@@ -528,7 +546,7 @@ def handle_storage_relationship_id_req(id):
             response = {
                 "storage_relationship": storage_relationship
             }
-            
+
         except Exception as e:
             print(e)
             response = {
@@ -543,9 +561,9 @@ def handle_storage_relationship_id_req(id):
         try:
             response_msg = cardinal_DB.delete_storage_relationship(id)
             response = {
-                "MSG":response_msg
-            } 
-            
+                "MSG": response_msg
+            }
+
         except Exception as e:
             print(e)
             response = {
@@ -555,6 +573,7 @@ def handle_storage_relationship_id_req(id):
             return jsonify(response)
 
         return jsonify(response)
+
 
 if __name__ != "__main__":
 
