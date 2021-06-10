@@ -8,6 +8,7 @@ def orchestrate_computation(computation_settings, cardinal_DB):
     # GET IP addresses for dataset owners
     # TODO: make this a call to postgres or mysql
     cardinals = request_data_owners(computation_settings['dataset_id'], cardinal_DB)
+
     PID1, IP1 = cardinals[0]
     payload = {
         "workflow_name": computation_settings['workflow_name'],
@@ -17,14 +18,14 @@ def orchestrate_computation(computation_settings, cardinal_DB):
         "other_cardinals": [x for x in cardinals if not x == (PID1, IP1)],
     }
     # instruct cardinal to start jiff server
-    r = requests.post(IP1 + '/api/start_jiff_server', json.dumps(payload), timeout=1)
+    r = requests.post(IP1 + '/api/start_jiff_server', json.dumps(payload),timeout=10)
     # print('TEXT --> ', r.text)
     if r.status_code != 200:
         error = r.json()
         msg = f'JIFF Server could not be started: {error}'
         raise Exception(msg)
     body = r.json()
-    jiff_server_IP = body["JIFF_SERVER_IP"]+":8080"
+    jiff_server_IP = body["JIFF_SERVER_IP"]
     # print('BODY --> ', body)
 
     loop = asyncio.new_event_loop()
@@ -77,6 +78,8 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
         }
         ip_payload += [(IP, json.dumps(payload))]
 
+    # adapted from:
+    # https://medium.com/hackernoon/how-to-run-asynchronous-web-requests-in-parallel-with-python-3-5-without-aiohttp-264dc0f8546
     with ThreadPoolExecutor(max_workers=3) as executor:
         # Set any session parameters here before calling `fetch`
         loop = asyncio.get_event_loop()
@@ -100,3 +103,4 @@ def send_submit(ip, payload):
         response = response.json()
 
     return response
+
