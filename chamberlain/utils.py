@@ -25,7 +25,7 @@ def orchestrate_computation(computation_settings, cardinal_DB):
         msg = f'JIFF Server could not be started: {error}'
         raise Exception(msg)
     body = r.json()
-    jiff_server_IP = body["JIFF_SERVER_IP"]+":8080"
+    jiff_server_IP = body["JIFF_SERVER_IP"]
     # print('BODY --> ', body)
 
     loop = asyncio.new_event_loop()
@@ -78,6 +78,8 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
         }
         ip_payload += [(IP, json.dumps(payload))]
 
+    # adapted from:
+    # https://medium.com/hackernoon/how-to-run-asynchronous-web-requests-in-parallel-with-python-3-5-without-aiohttp-264dc0f8546
     with ThreadPoolExecutor(max_workers=3) as executor:
         # Set any session parameters here before calling `fetch`
         loop = asyncio.get_event_loop()
