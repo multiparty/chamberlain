@@ -69,11 +69,18 @@ class DB:
                 list of cardinal ips
         '''
 
-        query = 'Select cardinalIp from chamberlain.cardinals where cardinalId in ' + '(' + ','.join(['%s']*len(cardinalIds)) + ')'
+        query = 'Select cardinalId,cardinalIp from chamberlain.cardinals where cardinalId in ' + '(' + ','.join(['%s']*len(cardinalIds)) + ')'
         cursor = self.conn.cursor()
         cursor.execute(query,cardinalIds)
-        result = list(cursor.fetchall())
-        result = [tpl[0] for tpl in result]
+        query_output = list(cursor.fetchall())
+        id_ip_dict = {}
+        for tpl in query_output:
+            id_ip_dict[tpl[0]] = tpl[1]
+
+        result = []
+        for id in cardinalIds:
+            result.append(id_ip_dict[id])
+
         cursor.close()
 
         return result
