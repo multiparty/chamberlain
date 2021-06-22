@@ -73,7 +73,7 @@ def submit():
 # -------------- #
 # WORKFLOW TABLE #
 # -------------- #
-@app.route("/api/workflow", methods=["POST", "GET"])
+@app.route("/api/workflow", methods=["POST", "GET","PUT"])
 def handle_workflow_req():
 
     # handle the POST request
@@ -101,7 +101,7 @@ def handle_workflow_req():
             return jsonify(response)
 
         return jsonify(response)
-    # otherwise handle the GET request
+    # handle the GET request
     elif request.method == "GET":
         try:
             workflows = cardinal_DB.get_workflows()
@@ -119,6 +119,31 @@ def handle_workflow_req():
 
         return jsonify(response)
 
+    # handle PUT request method
+    elif request.method == 'PUT':
+        """
+            Request format:
+            {
+                "workflowId":"WK105",
+                "operationName": "STD-DEV"
+            }
+        """
+        try:
+            request_data = request.get_json()
+            response_msg = cardinal_DB.modify_workflow(request_data)
+            response = {
+                "MSG": response_msg
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
 
 @app.route("/api/workflow/<id>", methods=["GET", "DELETE"])
 def handle_workflow_id_req(id):
@@ -394,7 +419,7 @@ def handle_cardinal_id_req(id):
 # ---------------------------- #
 # WORKFLOW_RELATIONSHIPS TABLE #
 # ---------------------------- #
-@app.route("/api/workflow-relationship", methods=["POST", "GET"])
+@app.route("/api/workflow-relationship", methods=["POST", "GET","PUT"])
 def handle_workflow_relationship_req():
 
     # handle the POST request
@@ -404,7 +429,8 @@ def handle_workflow_relationship_req():
             {
                 "workflowRelationshipId":"WR109",
                 "datasetId": "HRI007",
-                "workflowId":"WK103"
+                "workflowId":"WK103",
+                "columns":"a,b,c" comma separated column names
             }
         """
         try:
@@ -424,12 +450,38 @@ def handle_workflow_relationship_req():
 
         return jsonify(response)
 
-    # otherwise handle the GET request
+    # handle the GET request
     elif request.method == "GET":
         try:
             workflow_relationships = cardinal_DB.get_workflow_relationships()
             response = {
                 "workflow_relationships": workflow_relationships
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+    # handle the PUT request
+    elif request.method == "PUT":
+        """
+            Request format:
+            {
+                "workflowRelationshipId":"WR109",
+                key: value
+            }
+        """
+        try:
+            request_data = request.get_json()
+            response_msg = cardinal_DB.modify_workflow_relationship(request_data)
+            response = {
+                "MSG": response_msg
             }
 
         except Exception as e:
@@ -485,7 +537,7 @@ def handle_workflow_relationship_id_req(id):
 # --------------------------- #
 # STORAGE_RELATIONSHIPS TABLE #
 # --------------------------- #
-@app.route("/api/storage-relationship", methods=["POST", "GET"])
+@app.route("/api/storage-relationship", methods=["POST", "GET","PUT"])
 def handle_storage_relationship_req():
 
     # handle the POST request
@@ -517,12 +569,38 @@ def handle_storage_relationship_req():
 
         return jsonify(response)
 
-    # otherwise handle the GET request
+    # handle the GET request
     elif request.method == "GET":
         try:
             storage_relationships = cardinal_DB.get_storage_relationships()
             response = {
                 "storage_relationships": storage_relationships
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": e
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+        
+    # handle the PUT request
+    elif request.method == "PUT":
+        """
+            Request format:
+            {
+                "storageRelationshipId":"SR109",
+                "key": "value" 
+            }
+        """
+        try:
+            request_data = request.get_json()
+            response_msg = cardinal_DB.modify_storage_relationship(request_data)
+            response = {
+                "MSG": response_msg
             }
 
         except Exception as e:

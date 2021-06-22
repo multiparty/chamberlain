@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `chamberlain`.`workflowRelationships` (
   `workflowRelationshipId` VARCHAR(45) NOT NULL,
   `datasetId` VARCHAR(45) NULL,
   `workflowId` VARCHAR(45) NULL,
+  `columns` VARCHAR(1000) NULL,
   PRIMARY KEY (`workflowRelationshipId`))
 ENGINE = InnoDB;
 

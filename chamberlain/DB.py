@@ -141,6 +141,32 @@ class DB:
 
         return 'successful'
 
+    def modify_workflow(self, payload):
+        """
+            This function modifies workflow in the MySQL chamberlain database
+            params:
+                payload: request payload  - dict
+        """
+
+        if 'workflowId' in payload:
+            cursor = self.conn.cursor()
+            attributes = ['operationName']
+            query = 'UPDATE chamberlain.workflows SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where workflowId="' + payload['workflowId'] + '"'
+
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successfull'
+
+        else:
+            return "request format not correct"
+
     # dataset
     def insert_dataset(self, payload):
         """
@@ -205,17 +231,23 @@ class DB:
         return 'successful'
 
     def modify_dataset(self, payload):
-
         """
             This function modifies dataset in the MySQL chamberlain database
             params:
                 payload: request payload  - dict
         """
 
-        if 'datasetSchema' in payload and 'datasetId' in payload:
+        if 'datasetId' in payload:
             cursor = self.conn.cursor()
-            query = 'UPDATE chamberlain.datasets SET datasetSchema =%s WHERE datasetId=%s'
-            cursor.execute(query, (payload['datasetSchema'], payload['datasetId']))
+            attributes = ['datasetSchema']
+            query = 'UPDATE chamberlain.datasets SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where datasetId="' + payload['datasetId'] + '"'
+
+            cursor.execute(query)
             self.conn.commit()
             cursor.close()
 
@@ -294,10 +326,17 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'cardinalIp' in payload and 'cardinalId' in payload:
+        if 'cardinalId' in payload:
             cursor = self.conn.cursor()
-            query = 'UPDATE chamberlain.cardinals SET cardinalIp =%s WHERE cardinalId=%s'
-            cursor.execute(query,( payload['cardinalIp'],payload['cardinalId'] ))
+            attributes = ['cardinalIp']
+            query = 'UPDATE chamberlain.cardinals SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where cardinalId="' + payload['cardinalId'] + '"'
+
+            cursor.execute(query)
             self.conn.commit()
             cursor.close()
 
@@ -314,10 +353,10 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload:
+        if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload and 'columns' in payload:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.workflowrelationships (workflowRelationshipId,datasetId,workflowId) VALUES (%s,%s,%s)'
-            cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId']))
+            query = 'INSERT INTO chamberlain.workflowrelationships (workflowRelationshipId,datasetId,workflowId,columns) VALUES (%s,%s,%s,%s)'
+            cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId'], payload['columns']))
             self.conn.commit()
             cursor.close()
 
@@ -368,6 +407,32 @@ class DB:
         cursor.close()
 
         return 'successful'
+
+    def modify_workflow_relationship(self, payload):
+        """
+            This function modifies worflow relationship in the MySQL chamberlain database
+            params:
+                payload: request payload  - dict
+        """
+
+        if 'workflowRelationshipId' in payload:
+            cursor = self.conn.cursor()
+            attributes = ['datasetId','workflowId','columns']
+            query = 'UPDATE chamberlain.workflowRelationships SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where workflowRelationshipId="' + payload['workflowRelationshipId'] + '"'
+
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successfull'
+
+        else:
+            return "request format not correct"
 
     # storage relationship
     def insert_storage_relationship(self, payload):
@@ -432,3 +497,29 @@ class DB:
         cursor.close()
 
         return 'successful'
+
+    def modify_storage_relationship(self, payload):
+        """
+            This function modifies storage relationship in the MySQL chamberlain database
+            params:
+                payload: request payload  - dict
+        """
+
+        if 'storageRelationshipId' in payload:
+            cursor = self.conn.cursor()
+            attributes = ['datasetId','cardinalId1','cardinalId2','cardinalId3']
+            query = 'UPDATE chamberlain.storageRelationships SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where storageRelationshipId="' + payload['storageRelationshipId'] + '"'
+
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successfull'
+
+        else:
+            return "request format not correct"
