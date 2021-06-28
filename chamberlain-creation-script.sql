@@ -44,7 +44,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chamberlain`.`cardinals` (
   `cardinalId` VARCHAR(45) NOT NULL,
-  `cardinalIp` VARCHAR(45) NULL,
+  `cardinalIp` VARCHAR(1000) NULL,
   PRIMARY KEY (`cardinalId`))
 ENGINE = InnoDB;
 
@@ -69,7 +69,6 @@ CREATE TABLE IF NOT EXISTS `chamberlain`.`workflowRelationships` (
   `workflowRelationshipId` VARCHAR(45) NOT NULL,
   `datasetId` VARCHAR(45) NULL,
   `workflowId` VARCHAR(45) NULL,
-  `columns` VARCHAR(1000) NULL,
   PRIMARY KEY (`workflowRelationshipId`))
 ENGINE = InnoDB;
 

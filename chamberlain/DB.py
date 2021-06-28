@@ -353,10 +353,10 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload and 'columns' in payload:
+        if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload :
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.workflowrelationships (workflowRelationshipId,datasetId,workflowId,columns) VALUES (%s,%s,%s,%s)'
-            cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId'], payload['columns']))
+            query = 'INSERT INTO chamberlain.workflowrelationships (workflowRelationshipId,datasetId,workflowId) VALUES (%s,%s,%s)'
+            cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId']))
             self.conn.commit()
             cursor.close()
 
@@ -417,7 +417,7 @@ class DB:
 
         if 'workflowRelationshipId' in payload:
             cursor = self.conn.cursor()
-            attributes = ['datasetId','workflowId','columns']
+            attributes = ['datasetId','workflowId']
             query = 'UPDATE chamberlain.workflowRelationships SET '
             for key,value in payload.items():
                 if key in attributes :

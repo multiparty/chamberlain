@@ -430,7 +430,6 @@ def handle_workflow_relationship_req():
                 "workflowRelationshipId":"WR109",
                 "datasetId": "HRI007",
                 "workflowId":"WK103",
-                "columns":"a,b,c" comma separated column names
             }
         """
         try:
