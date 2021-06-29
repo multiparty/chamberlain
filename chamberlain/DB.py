@@ -22,6 +22,7 @@ class DB:
                 password=os.environ.get('MYSQL_PASSWORD'),
                 database=os.environ.get('MYSQL_DB'),
             )
+            self.database_name = os.environ.get('MYSQL_DB')
         except Exception as e:
             print(e)
 
@@ -44,7 +45,7 @@ class DB:
                 datasetId
         """
 
-        query = 'SELECT * from chamberlain.storagerelationships WHERE datasetId="' + datasetId + '"'
+        query = 'SELECT * from ' + self.database_name + '.storagerelationships WHERE datasetId="' + datasetId + '"'
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = list(cursor.fetchall())
@@ -61,7 +62,7 @@ class DB:
                 list of cardinal ips
         """
 
-        query = 'Select cardinalId,cardinalIp from chamberlain.cardinals where cardinalId in ' + '(' + ','.join(['%s']*len(cardinalIds)) + ')'
+        query = 'Select cardinalId,cardinalIp from ' + self.database_name + '.cardinals where cardinalId in ' + '(' + ','.join(['%s']*len(cardinalIds)) + ')'
         cursor = self.conn.cursor()
         cursor.execute(query, cardinalIds)
         query_output = list(cursor.fetchall())
@@ -89,7 +90,7 @@ class DB:
 
         if 'operationName' in payload and 'workflowId' in payload:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.workflows (workflowId,operationName) VALUES (%s,%s)'
+            query = 'INSERT INTO ' + self.database_name + '.workflows (workflowId,operationName) VALUES (%s,%s)'
             cursor.execute(query, (payload['workflowId'], payload['operationName']))
             self.conn.commit()
             cursor.close()
@@ -104,7 +105,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflows'
+        query = 'SELECT * FROM ' + self.database_name + '.workflows'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -119,7 +120,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflows WHERE workflowId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.workflows WHERE workflowId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -134,7 +135,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.workflows WHERE workflowId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.workflows WHERE workflowId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -151,7 +152,7 @@ class DB:
         if 'workflowId' in payload:
             cursor = self.conn.cursor()
             attributes = ['operationName']
-            query = 'UPDATE chamberlain.workflows SET '
+            query = 'UPDATE ' + self.database_name + '.workflows SET '
             for key,value in payload.items():
                 if key in attributes :
                     query += key + '="' + value + '", '
@@ -177,7 +178,7 @@ class DB:
 
         if 'datasetSchema' in payload and 'datasetId' in payload:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.datasets (datasetId,datasetSchema) VALUES (%s,%s)'
+            query = 'INSERT INTO ' + self.database_name + '.datasets (datasetId,datasetSchema) VALUES (%s,%s)'
             cursor.execute(query, (payload['datasetId'], payload['datasetSchema']))
             self.conn.commit()
             cursor.close()
@@ -193,7 +194,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.datasets'
+        query = 'SELECT * FROM ' + self.database_name + '.datasets'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -208,7 +209,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.datasets WHERE datasetId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.datasets WHERE datasetId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -223,7 +224,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.datasets WHERE datasetId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.datasets WHERE datasetId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -240,7 +241,7 @@ class DB:
         if 'datasetId' in payload:
             cursor = self.conn.cursor()
             attributes = ['datasetSchema']
-            query = 'UPDATE chamberlain.datasets SET '
+            query = 'UPDATE ' + self.database_name + '.datasets SET '
             for key,value in payload.items():
                 if key in attributes :
                     query += key + '="' + value + '", '
@@ -266,7 +267,7 @@ class DB:
 
         if 'cardinalIp' in payload and 'cardinalId' in payload:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.cardinals (cardinalId,cardinalIp) VALUES (%s,%s)'
+            query = 'INSERT INTO ' + self.database_name + '.cardinals (cardinalId,cardinalIp) VALUES (%s,%s)'
             cursor.execute(query, (payload['cardinalId'], payload['cardinalIp']))
             self.conn.commit()
             cursor.close()
@@ -282,7 +283,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.cardinals'
+        query = 'SELECT * FROM ' + self.database_name + '.cardinals'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -297,7 +298,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.cardinals WHERE cardinalId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.cardinals WHERE cardinalId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -312,7 +313,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.cardinals WHERE cardinalId="' + str(id) + '"'
+        query = 'DELETE FROM '  + self.database_name + '.cardinals WHERE cardinalId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -329,7 +330,7 @@ class DB:
         if 'cardinalId' in payload:
             cursor = self.conn.cursor()
             attributes = ['cardinalIp']
-            query = 'UPDATE chamberlain.cardinals SET '
+            query = 'UPDATE ' + self.database_name + '.cardinals SET '
             for key,value in payload.items():
                 if key in attributes :
                     query += key + '="' + value + '", '
@@ -355,7 +356,7 @@ class DB:
 
         if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload :
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.workflowrelationships (workflowRelationshipId,datasetId,workflowId) VALUES (%s,%s,%s)'
+            query = 'INSERT INTO '  + self.database_name + '.workflowrelationships (workflowRelationshipId,datasetId,workflowId) VALUES (%s,%s,%s)'
             cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId']))
             self.conn.commit()
             cursor.close()
@@ -371,7 +372,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflowrelationships'
+        query = 'SELECT * FROM ' + self.database_name + '.workflowrelationships'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -386,7 +387,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -401,7 +402,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -418,7 +419,7 @@ class DB:
         if 'workflowRelationshipId' in payload:
             cursor = self.conn.cursor()
             attributes = ['datasetId','workflowId']
-            query = 'UPDATE chamberlain.workflowRelationships SET '
+            query = 'UPDATE ' + self.database_name + '.workflowRelationships SET '
             for key,value in payload.items():
                 if key in attributes :
                     query += key + '="' + value + '", '
@@ -445,7 +446,7 @@ class DB:
         flag = all([True for col in cols if col in payload])
         if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.storagerelationships (storageRelationshipId,datasetId,cardinalId1,cardinalId2,cardinalId3) VALUES (%s,%s,%s,%s,%s)'
+            query = 'INSERT INTO ' + self.database_name + '.storagerelationships (storageRelationshipId,datasetId,cardinalId1,cardinalId2,cardinalId3) VALUES (%s,%s,%s,%s,%s)'
             cursor.execute(query, (payload['storageRelationshipId'], payload['datasetId'], payload['cardinalId1'], payload['cardinalId2'], payload['cardinalId3']))
             self.conn.commit()
             cursor.close()
@@ -461,7 +462,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.storagerelationships'
+        query = 'SELECT * FROM ' + self.database_name + '.storagerelationships'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -476,7 +477,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -491,7 +492,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -508,7 +509,7 @@ class DB:
         if 'storageRelationshipId' in payload:
             cursor = self.conn.cursor()
             attributes = ['datasetId','cardinalId1','cardinalId2','cardinalId3']
-            query = 'UPDATE chamberlain.storageRelationships SET '
+            query = 'UPDATE ' + self.database_name + '.storageRelationships SET '
             for key,value in payload.items():
                 if key in attributes :
                     query += key + '="' + value + '", '
