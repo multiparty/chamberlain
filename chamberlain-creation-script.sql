@@ -24,7 +24,7 @@ USE `chamberlain` ;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chamberlain`.`datasets` (
   `datasetId` VARCHAR(45) NOT NULL,
-  `datasetschema` VARCHAR(1000) NULL,
+  `datasetSchema` VARCHAR(1000) NULL,
   PRIMARY KEY (`datasetId`))
 ENGINE = InnoDB;
 

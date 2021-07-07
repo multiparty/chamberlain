@@ -197,7 +197,6 @@ def handle_dataset_req():
             {
                 "datasetId":"HRI101",
                 "datasetSchema": "age,location,height"
-                "cardinalId":[list of cardinal ids]
             }
         """
         try:
