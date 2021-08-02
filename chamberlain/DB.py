@@ -31,7 +31,7 @@ class DB:
             time.sleep(delay)
 
         storage_relationship = self.get_storage_relationship_from_dataset_id(key)
-        cardinalIds = list(storage_relationship[0][2:5])
+        cardinalIds = storage_relationship[0][2].split(',')
         cardinalIps = self.get_cardinal_ips_from_ids(cardinalIds)
         owners = ['http://' + ip if 'http://' not in ip else ip for ip in cardinalIps]
         owners = [(i+1, ip) for i, ip in enumerate(owners)]
@@ -45,7 +45,7 @@ class DB:
                 datasetId
         """
 
-        query = 'SELECT * from ' + self.database_name + '.storagerelationships WHERE datasetId="' + datasetId + '"'
+        query = 'SELECT * from ' + self.database_name + '.storageRelationships WHERE datasetId="' + datasetId + '"'
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = list(cursor.fetchall())
@@ -78,6 +78,43 @@ class DB:
 
         return result
 
+    def get_workflow_location_from_request(self, dataset_id,operation_name):
+        """
+            This function will return workflow bucket and key from dataset id and operation
+            params:
+                dataset_id: dataset id
+                operation_name: name of operation
+            returns:
+                workflow_source_bucket, workflow_source_key
+        """
+
+        query = 'Select sourceBucket,sourceKey from ' + self.database_name + '.workflows where datasetId="' + dataset_id + '" and operationName= "' + operation_name+ '"'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        query_output = list(cursor.fetchall())[0]
+        cursor.close()
+
+        return query_output
+    
+    def get_dataset_info_from_dataset_id(self, dataset_id,num_parties):
+        """
+            This function will return dataset bucket and key from dataset id for all parties
+            params:
+                dataset_id: dataset id
+                num_parties: number of parties
+            returns:
+                list of tuples of (pid,dataset_source_bucket,dataset_source_key,parameters)
+        """
+
+        pid_str = '(' + ','.join([str(i+1) for i in range(num_parties) ]) + ')'
+        query = 'Select pid,sourceBucket,sourceKey,parameters from ' + self.database_name + '.datasets where datasetId="' + dataset_id + '" and pid in ' + pid_str
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        query_output = list(cursor.fetchall())
+        cursor.close()
+
+        return query_output
+
     # chamberlain db crud operation functions
 
     # workflow
@@ -88,10 +125,16 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'operationName' in payload and 'workflowId' in payload:
+        cols = ['workflowId','operationName', 'datasetId', 'sourceBucket','sourceKey','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO ' + self.database_name + '.workflows (workflowId,operationName) VALUES (%s,%s)'
-            cursor.execute(query, (payload['workflowId'], payload['operationName']))
+            query = 'INSERT INTO ' + self.database_name + '.workflows ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
@@ -151,7 +194,7 @@ class DB:
 
         if 'workflowId' in payload:
             cursor = self.conn.cursor()
-            attributes = ['operationName']
+            attributes = ['operationName','datasetId', 'sourceBucket','sourceKey','description']
             query = 'UPDATE ' + self.database_name + '.workflows SET '
             for key,value in payload.items():
                 if key in attributes :
@@ -176,10 +219,16 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'datasetSchema' in payload and 'datasetId' in payload:
+        cols = ['pid','datasetId', 'datasetSchema','sourceBucket','sourceKey','backend','parameters','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO ' + self.database_name + '.datasets (datasetId,datasetSchema) VALUES (%s,%s)'
-            cursor.execute(query, (payload['datasetId'], payload['datasetSchema']))
+            query = 'INSERT INTO ' + self.database_name + '.datasets ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
@@ -240,7 +289,7 @@ class DB:
 
         if 'datasetId' in payload:
             cursor = self.conn.cursor()
-            attributes = ['datasetSchema']
+            attributes = ['pid','datasetSchema','sourceBucket','sourceKey','backend','parameters','description']
             query = 'UPDATE ' + self.database_name + '.datasets SET '
             for key,value in payload.items():
                 if key in attributes :
@@ -265,10 +314,16 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'cardinalIp' in payload and 'cardinalId' in payload:
+        cols = ['cardinalId', 'cardinalIp']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO ' + self.database_name + '.cardinals (cardinalId,cardinalIp) VALUES (%s,%s)'
-            cursor.execute(query, (payload['cardinalId'], payload['cardinalIp']))
+            query = 'INSERT INTO ' + self.database_name + '.cardinals ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
@@ -354,10 +409,16 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload :
+        cols = ['workflowRelationshipId', 'datasetId','workflowId','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO '  + self.database_name + '.workflowrelationships (workflowRelationshipId,datasetId,workflowId) VALUES (%s,%s,%s)'
-            cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId']))
+            query = 'INSERT INTO ' + self.database_name + '.workflowRelationships ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
@@ -372,7 +433,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM ' + self.database_name + '.workflowrelationships'
+        query = 'SELECT * FROM ' + self.database_name + '.workflowRelationships'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -387,7 +448,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM ' + self.database_name + '.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.workflowRelationships WHERE workflowRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -402,7 +463,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM ' + self.database_name + '.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.workflowRelationships WHERE workflowRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -418,7 +479,7 @@ class DB:
 
         if 'workflowRelationshipId' in payload:
             cursor = self.conn.cursor()
-            attributes = ['datasetId','workflowId']
+            attributes = ['datasetId','workflowId','description']
             query = 'UPDATE ' + self.database_name + '.workflowRelationships SET '
             for key,value in payload.items():
                 if key in attributes :
@@ -442,12 +503,16 @@ class DB:
             params:
                 payload: request payload  - dict
         """
-        cols = ['storageRelationshipId', 'datasetId', 'cardinalId1', 'cardinalId2', 'cardinalId3']
+        cols = ['storageRelationshipId', 'datasetId', 'cardinals', 'description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
         flag = all([True for col in cols if col in payload])
         if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO ' + self.database_name + '.storagerelationships (storageRelationshipId,datasetId,cardinalId1,cardinalId2,cardinalId3) VALUES (%s,%s,%s,%s,%s)'
-            cursor.execute(query, (payload['storageRelationshipId'], payload['datasetId'], payload['cardinalId1'], payload['cardinalId2'], payload['cardinalId3']))
+            query = 'INSERT INTO ' + self.database_name + '.storageRelationships ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
@@ -462,7 +527,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM ' + self.database_name + '.storagerelationships'
+        query = 'SELECT * FROM ' + self.database_name + '.storageRelationships'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -477,7 +542,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM ' + self.database_name + '.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -492,7 +557,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM ' + self.database_name + '.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -508,7 +573,7 @@ class DB:
 
         if 'storageRelationshipId' in payload:
             cursor = self.conn.cursor()
-            attributes = ['datasetId','cardinalId1','cardinalId2','cardinalId3']
+            attributes = ['datasetId','cardinals','description']
             query = 'UPDATE ' + self.database_name + '.storageRelationships SET '
             for key,value in payload.items():
                 if key in attributes :
