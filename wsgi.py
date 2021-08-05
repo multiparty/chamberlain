@@ -203,8 +203,6 @@ def handle_dataset_req():
                 "pid": 1,
                 "datasetId":"HRI101",
                 "datasetSchema": "age,location,height",
-                "sourceBucket":"bucket-name",
-                "sourceKey":"path/to/data/",
                 "backend":"backend-name",
                 "parameters":"{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}", # stringified dict of parameters
                 "description":"some description"
@@ -322,7 +320,8 @@ def handle_cardinal_req():
             Request format:
             {
                 "cardinalId":"cardinal023",
-                "cardinalIp": "12.23.34.45"
+                "cardinalIp": "12.23.34.45",
+                "description": "some description"
             }
         """
         try:

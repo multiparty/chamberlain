@@ -95,7 +95,7 @@ class DB:
         cursor.close()
 
         return query_output
-    
+
     def get_dataset_info_from_dataset_id(self, dataset_id,num_parties):
         """
             This function will return dataset bucket and key from dataset id for all parties
@@ -107,7 +107,7 @@ class DB:
         """
 
         pid_str = '(' + ','.join([str(i+1) for i in range(num_parties) ]) + ')'
-        query = 'Select pid,sourceBucket,sourceKey,parameters from ' + self.database_name + '.datasets where datasetId="' + dataset_id + '" and pid in ' + pid_str
+        query = 'Select pid,parameters from ' + self.database_name + '.datasets where datasetId="' + dataset_id + '" and pid in ' + pid_str
         cursor = self.conn.cursor()
         cursor.execute(query)
         query_output = list(cursor.fetchall())
@@ -219,7 +219,7 @@ class DB:
                 payload: request payload  - dict
         """
 
-        cols = ['pid','datasetId', 'datasetSchema','sourceBucket','sourceKey','backend','parameters','description']
+        cols = ['pid','datasetId', 'datasetSchema','backend','parameters','description']
         identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
         columns_str = '(' + ','.join(cols) + ')'
 
@@ -289,7 +289,7 @@ class DB:
 
         if 'datasetId' in payload:
             cursor = self.conn.cursor()
-            attributes = ['pid','datasetSchema','sourceBucket','sourceKey','backend','parameters','description']
+            attributes = ['pid','datasetSchema','backend','parameters','description']
             query = 'UPDATE ' + self.database_name + '.datasets SET '
             for key,value in payload.items():
                 if key in attributes :
@@ -314,7 +314,7 @@ class DB:
                 payload: request payload  - dict
         """
 
-        cols = ['cardinalId', 'cardinalIp']
+        cols = ['cardinalId', 'cardinalIp','description']
         identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
         columns_str = '(' + ','.join(cols) + ')'
 

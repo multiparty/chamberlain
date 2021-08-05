@@ -12,8 +12,8 @@ def orchestrate_computation(computation_settings, cardinal_DB):
     # get workflow source buckets and keys
     computation_settings['workflow_source_bucket'] , computation_settings['workflow_source_key'] = cardinal_DB.get_workflow_location_from_request(computation_settings['dataset_id'],computation_settings['operation'])
     # get datasets source bucket, source key and parameters
-    dataset_locations = cardinal_DB.get_dataset_info_from_dataset_id(computation_settings['dataset_id'],computation_settings['party_count'])
-    computation_settings['dataset_info'] = {pid:(bucket,key,parameters) for pid,bucket,key,parameters in dataset_locations}
+    dataset_parameters = cardinal_DB.get_dataset_info_from_dataset_id(computation_settings['dataset_id'],computation_settings['party_count'])
+    computation_settings['dataset_parameters'] = {pid:(parameters) for pid,parameters in dataset_parameters}
 
     PID1, IP1 = cardinals[0]
     payload = {
@@ -22,8 +22,6 @@ def orchestrate_computation(computation_settings, cardinal_DB):
         "operation": computation_settings['operation'],
         "workflow_source_bucket": computation_settings['workflow_source_bucket'],
         "workflow_source_key": computation_settings['workflow_source_key'],
-        "dataset_source_bucket": computation_settings['dataset_info'][PID1][0],
-        "dataset_source_key": computation_settings['dataset_info'][PID1][1],
         "PID": PID1,
         "other_cardinals": [x for x in cardinals if not x == (PID1, IP1)],
     }
@@ -90,15 +88,13 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
             "cardinal_ip": IP,
             "workflow_source_bucket": computation_settings['workflow_source_bucket'],
             "workflow_source_key": computation_settings['workflow_source_key'],
-            "dataset_source_bucket": computation_settings['dataset_info'][PID][0],
-            "dataset_source_key": computation_settings['dataset_info'][PID][1],
             "PID": PID,
             "other_cardinals": [x for x in cardinals if not x == (PID, IP)],
             "jiff_server": jiff_server_IP
         }
 
         try:
-            parameters = computation_settings['dataset_info'][PID][2]
+            parameters = computation_settings['dataset_parameters'][PID]
             parameters = ast.literal_eval(parameters.replace('false','False').replace('true','True').replace("ZP","zp"))
             payload.update(parameters)
         except:

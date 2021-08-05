@@ -1,13 +1,13 @@
 -- --------------------------------------------------------------------------------------------------------
 -- Datasets 
--- Columns : pid, datasetId, datasetSchema, sourceBucket, sourceKey, backend, parameters, description
+-- Columns : pid, datasetId, datasetSchema, backend, parameters, description
 -- --------------------------------------------------------------------------------------------------------
-INSERT INTO `datasets` VALUES (1,'HRI0','a,b,c,keeprows','curia-test','HRI0/shares/party_one/HRI0.csv','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
-INSERT INTO `datasets` VALUES (2,'HRI0','a,b,c,keeprows','curia-test','HRI0/shares/party_two/HRI0.csv','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
-INSERT INTO `datasets` VALUES (3,'HRI0','a,b,c,keeprows','curia-test','HRI0/shares/party_three/HRI0.csv','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
-INSERT INTO `datasets` VALUES (3,'HRI1','d,e,f,keeprows','curia-test','HRI1/shares/party_three/HRI1.csv','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
-INSERT INTO `datasets` VALUES (2,'HRI1','d,e,f,keeprows','curia-test','HRI1/shares/party_two/HRI1.csv','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
-INSERT INTO `datasets` VALUES (1,'HRI1','d,e,f,keeprows','curia-test','HRI1/shares/party_one/HRI1.csv','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
+INSERT INTO `datasets` VALUES (1,'HRI0','a,b,c,keeprows','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
+INSERT INTO `datasets` VALUES (2,'HRI0','a,b,c,keeprows','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
+INSERT INTO `datasets` VALUES (3,'HRI0','a,b,c,keeprows','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
+INSERT INTO `datasets` VALUES (3,'HRI1','d,e,f,keeprows','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
+INSERT INTO `datasets` VALUES (2,'HRI1','d,e,f,keeprows','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
+INSERT INTO `datasets` VALUES (1,'HRI1','d,e,f,keeprows','jiff','{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}','no description');
 
 -- --------------------------------------------------------------------------------------------------------
 -- Workflows
@@ -25,9 +25,9 @@ INSERT INTO `workflows` VALUES ('WK006','std_dev','HRI1','curia-test','workflows
 -- Columns: cardinalId, cardinalIp, description
 -- Change these IP addresses according to your deployments
 -- --------------------------------------------------------------------------------------------------------
-INSERT INTO `cardinals` VALUES ('cardinal001','http://34.139.197.119:80');
-INSERT INTO `cardinals` VALUES ('cardinal002','http://a4c680c558a854e3388375a19f09fcea-1087590076.us-east-1.elb.amazonaws.com:5000');
-INSERT INTO `cardinals` VALUES ('cardinal003','http://52.224.188.74:5000');
+INSERT INTO `cardinals` VALUES ('cardinal001','http://34.139.197.119:80','no description');
+INSERT INTO `cardinals` VALUES ('cardinal002','http://a4c680c558a854e3388375a19f09fcea-1087590076.us-east-1.elb.amazonaws.com:5000','no description');
+INSERT INTO `cardinals` VALUES ('cardinal003','http://52.224.188.74:5000','no description');
 
 -- --------------------------------------------------------------------------------------------------------
 -- Storage Relationships

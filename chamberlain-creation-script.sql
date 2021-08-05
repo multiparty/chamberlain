@@ -23,6 +23,7 @@ USE `chamberlain` ;
 CREATE TABLE IF NOT EXISTS `chamberlain`.`cardinals` (
   `cardinalId` VARCHAR(45) NOT NULL,
   `cardinalIp` VARCHAR(1000) NULL DEFAULT NULL,
+  `description` VARCHAR(1000) NULL DEFAULT NULL,
   PRIMARY KEY (`cardinalId`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
@@ -37,8 +38,6 @@ CREATE TABLE IF NOT EXISTS `chamberlain`.`datasets` (
   `pid` INT NULL DEFAULT NULL,
   `datasetId` VARCHAR(45) NULL DEFAULT NULL,
   `datasetSchema` VARCHAR(1000) NULL DEFAULT NULL,
-  `sourceBucket` VARCHAR(1000) NULL DEFAULT NULL,
-  `sourceKey` VARCHAR(1000) NULL DEFAULT NULL,
   `backend` VARCHAR(1000) NULL DEFAULT NULL,
   `parameters` VARCHAR(1000) NULL DEFAULT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
