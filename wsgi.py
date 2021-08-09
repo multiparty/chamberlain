@@ -55,7 +55,7 @@ def submit():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -73,7 +73,7 @@ def submit():
 # -------------- #
 # WORKFLOW TABLE #
 # -------------- #
-@app.route("/api/workflow", methods=["POST", "GET","PUT"])
+@app.route("/api/workflow", methods=["POST", "GET", "PUT"])
 def handle_workflow_req():
 
     # handle the POST request
@@ -100,7 +100,7 @@ def handle_workflow_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -117,7 +117,7 @@ def handle_workflow_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -143,12 +143,13 @@ def handle_workflow_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
 
         return jsonify(response)
+
 
 @app.route("/api/workflow/<workflowId>", methods=["GET", "DELETE"])
 def handle_workflow_id_req(workflowId):
@@ -164,7 +165,7 @@ def handle_workflow_id_req(workflowId):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -181,7 +182,7 @@ def handle_workflow_id_req(workflowId):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -204,7 +205,8 @@ def handle_dataset_req():
                 "datasetId":"HRI101",
                 "datasetSchema": "age,location,height",
                 "backend":"backend-name",
-                "parameters":"{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, "decimalDigits": 0, "ZP": 16777729}", # stringified dict of parameters
+                "parameters":"{ "bigNumber": False, "negativeNumber":False, "fixedPoint":False, "integerDigits":0, 
+                    "decimalDigits": 0, "ZP": 16777729}", # stringified dict of parameters
                 "description":"some description"
             }
         """
@@ -218,7 +220,7 @@ def handle_dataset_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -236,7 +238,7 @@ def handle_dataset_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -262,7 +264,7 @@ def handle_dataset_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -284,7 +286,7 @@ def handle_dataset_id_req(datasetId):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -301,7 +303,7 @@ def handle_dataset_id_req(datasetId):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -334,7 +336,7 @@ def handle_cardinal_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -352,7 +354,7 @@ def handle_cardinal_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -378,7 +380,7 @@ def handle_cardinal_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -400,7 +402,7 @@ def handle_cardinal_id_req(id):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -417,7 +419,7 @@ def handle_cardinal_id_req(id):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -428,7 +430,7 @@ def handle_cardinal_id_req(id):
 # ---------------------------- #
 # WORKFLOW_RELATIONSHIPS TABLE #
 # ---------------------------- #
-@app.route("/api/workflow-relationship", methods=["POST", "GET","PUT"])
+@app.route("/api/workflow-relationship", methods=["POST", "GET", "PUT"])
 def handle_workflow_relationship_req():
 
     # handle the POST request
@@ -452,7 +454,7 @@ def handle_workflow_relationship_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -470,7 +472,7 @@ def handle_workflow_relationship_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -496,7 +498,7 @@ def handle_workflow_relationship_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -518,7 +520,7 @@ def handle_workflow_relationship_id_req(id):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -535,7 +537,7 @@ def handle_workflow_relationship_id_req(id):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -546,7 +548,7 @@ def handle_workflow_relationship_id_req(id):
 # --------------------------- #
 # STORAGE_RELATIONSHIPS TABLE #
 # --------------------------- #
-@app.route("/api/storage-relationship", methods=["POST", "GET","PUT"])
+@app.route("/api/storage-relationship", methods=["POST", "GET", "PUT"])
 def handle_storage_relationship_req():
 
     # handle the POST request
@@ -570,7 +572,7 @@ def handle_storage_relationship_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -588,13 +590,13 @@ def handle_storage_relationship_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
 
         return jsonify(response)
-        
+
     # handle the PUT request
     elif request.method == "PUT":
         """
@@ -614,7 +616,7 @@ def handle_storage_relationship_req():
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -636,7 +638,7 @@ def handle_storage_relationship_id_req(id):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)
@@ -653,7 +655,7 @@ def handle_storage_relationship_id_req(id):
         except Exception as e:
             print(e)
             response = {
-                "ERR": e
+                "ERR": str(e)
             }
             app.logger.error(f"Error sending request: {e}")
             return jsonify(response)

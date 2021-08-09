@@ -140,7 +140,7 @@ class DB:
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_workflows(self):
         """
@@ -209,7 +209,7 @@ class DB:
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     # dataset
     def insert_dataset(self, payload):
@@ -234,7 +234,7 @@ class DB:
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_datasets(self):
         """
@@ -304,7 +304,7 @@ class DB:
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     # cardinal
     def insert_cardinal(self, payload):
@@ -329,7 +329,7 @@ class DB:
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_cardinals(self):
         """
@@ -399,7 +399,7 @@ class DB:
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     # workflow relationship
     def insert_workflow_relationship(self, payload):
@@ -424,7 +424,7 @@ class DB:
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_workflow_relationships(self):
         """
@@ -494,7 +494,7 @@ class DB:
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     # storage relationship
     def insert_storage_relationship(self, payload):
@@ -518,7 +518,7 @@ class DB:
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_storage_relationships(self):
         """
@@ -588,4 +588,4 @@ class DB:
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
