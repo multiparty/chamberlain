@@ -1,4 +1,6 @@
 venv/
-src/__pycache__/
+*__pycache__/
 ./venv
 *.swp
+.idea
+.env
