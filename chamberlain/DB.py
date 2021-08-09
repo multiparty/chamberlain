@@ -22,6 +22,7 @@ class DB:
                 password=os.environ.get('MYSQL_PASSWORD'),
                 database=os.environ.get('MYSQL_DB'),
             )
+            self.database_name = os.environ.get('MYSQL_DB')
         except Exception as e:
             print(e)
 
@@ -30,7 +31,7 @@ class DB:
             time.sleep(delay)
 
         storage_relationship = self.get_storage_relationship_from_dataset_id(key)
-        cardinalIds = list(storage_relationship[0][2:5])
+        cardinalIds = storage_relationship[0][2].split(',')
         cardinalIps = self.get_cardinal_ips_from_ids(cardinalIds)
         owners = ['http://' + ip if 'http://' not in ip else ip for ip in cardinalIps]
         owners = [(i+1, ip) for i, ip in enumerate(owners)]
@@ -44,7 +45,7 @@ class DB:
                 datasetId
         """
 
-        query = 'SELECT * from chamberlain.storagerelationships WHERE datasetId="' + datasetId + '"'
+        query = 'SELECT * from ' + self.database_name + '.storageRelationships WHERE datasetId="' + datasetId + '"'
         cursor = self.conn.cursor()
         cursor.execute(query)
         result = list(cursor.fetchall())
@@ -61,7 +62,7 @@ class DB:
                 list of cardinal ips
         """
 
-        query = 'Select cardinalId,cardinalIp from chamberlain.cardinals where cardinalId in ' + '(' + ','.join(['%s']*len(cardinalIds)) + ')'
+        query = 'Select cardinalId,cardinalIp from ' + self.database_name + '.cardinals where cardinalId in ' + '(' + ','.join(['%s']*len(cardinalIds)) + ')'
         cursor = self.conn.cursor()
         cursor.execute(query, cardinalIds)
         query_output = list(cursor.fetchall())
@@ -77,6 +78,43 @@ class DB:
 
         return result
 
+    def get_workflow_location_from_request(self, dataset_id,operation_name):
+        """
+            This function will return workflow bucket and key from dataset id and operation
+            params:
+                dataset_id: dataset id
+                operation_name: name of operation
+            returns:
+                workflow_source_bucket, workflow_source_key
+        """
+
+        query = 'Select sourceBucket,sourceKey from ' + self.database_name + '.workflows where datasetId="' + dataset_id + '" and operationName= "' + operation_name+ '"'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        query_output = list(cursor.fetchall())[0]
+        cursor.close()
+
+        return query_output
+
+    def get_dataset_info_from_dataset_id(self, dataset_id,num_parties):
+        """
+            This function will return dataset bucket and key from dataset id for all parties
+            params:
+                dataset_id: dataset id
+                num_parties: number of parties
+            returns:
+                list of tuples of (pid,dataset_source_bucket,dataset_source_key,parameters)
+        """
+
+        pid_str = '(' + ','.join([str(i+1) for i in range(num_parties) ]) + ')'
+        query = 'Select pid,parameters from ' + self.database_name + '.datasets where datasetId="' + dataset_id + '" and pid in ' + pid_str
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        query_output = list(cursor.fetchall())
+        cursor.close()
+
+        return query_output
+
     # chamberlain db crud operation functions
 
     # workflow
@@ -87,16 +125,22 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'operationName' in payload and 'workflowId' in payload:
+        cols = ['workflowId','operationName', 'datasetId', 'sourceBucket','sourceKey','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.workflows (workflowId,operationName) VALUES (%s,%s)'
-            cursor.execute(query, (payload['workflowId'], payload['operationName']))
+            query = 'INSERT INTO ' + self.database_name + '.workflows ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_workflows(self):
         """
@@ -104,7 +148,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflows'
+        query = 'SELECT * FROM ' + self.database_name + '.workflows'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -119,7 +163,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflows WHERE workflowId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.workflows WHERE workflowId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -134,12 +178,38 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.workflows WHERE workflowId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.workflows WHERE workflowId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
 
         return 'successful'
+
+    def modify_workflow(self, payload):
+        """
+            This function modifies workflow in the MySQL chamberlain database
+            params:
+                payload: request payload  - dict
+        """
+
+        if 'workflowId' in payload:
+            cursor = self.conn.cursor()
+            attributes = ['operationName','datasetId', 'sourceBucket','sourceKey','description']
+            query = 'UPDATE ' + self.database_name + '.workflows SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where workflowId="' + payload['workflowId'] + '"'
+
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successfull'
+
+        else:
+            raise Exception("request format not correct")
 
     # dataset
     def insert_dataset(self, payload):
@@ -149,16 +219,22 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'datasetSchema' in payload and 'datasetId' in payload:
+        cols = ['pid','datasetId', 'datasetSchema','backend','parameters','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.datasets (datasetId,datasetSchema) VALUES (%s,%s)'
-            cursor.execute(query, (payload['datasetId'], payload['datasetSchema']))
+            query = 'INSERT INTO ' + self.database_name + '.datasets ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_datasets(self):
         """
@@ -167,7 +243,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.datasets'
+        query = 'SELECT * FROM ' + self.database_name + '.datasets'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -182,7 +258,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.datasets WHERE datasetId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.datasets WHERE datasetId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -197,7 +273,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.datasets WHERE datasetId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.datasets WHERE datasetId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -205,24 +281,30 @@ class DB:
         return 'successful'
 
     def modify_dataset(self, payload):
-
         """
             This function modifies dataset in the MySQL chamberlain database
             params:
                 payload: request payload  - dict
         """
 
-        if 'datasetSchema' in payload and 'datasetId' in payload:
+        if 'datasetId' in payload:
             cursor = self.conn.cursor()
-            query = 'UPDATE chamberlain.datasets SET datasetSchema =%s WHERE datasetId=%s'
-            cursor.execute(query, (payload['datasetSchema'], payload['datasetId']))
+            attributes = ['pid','datasetSchema','backend','parameters','description']
+            query = 'UPDATE ' + self.database_name + '.datasets SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where datasetId="' + payload['datasetId'] + '"'
+
+            cursor.execute(query)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     # cardinal
     def insert_cardinal(self, payload):
@@ -232,16 +314,22 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'cardinalIp' in payload and 'cardinalId' in payload:
+        cols = ['cardinalId', 'cardinalIp','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.cardinals (cardinalId,cardinalIp) VALUES (%s,%s)'
-            cursor.execute(query, (payload['cardinalId'], payload['cardinalIp']))
+            query = 'INSERT INTO ' + self.database_name + '.cardinals ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_cardinals(self):
         """
@@ -250,7 +338,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.cardinals'
+        query = 'SELECT * FROM ' + self.database_name + '.cardinals'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -265,7 +353,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.cardinals WHERE cardinalId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.cardinals WHERE cardinalId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -280,7 +368,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.cardinals WHERE cardinalId="' + str(id) + '"'
+        query = 'DELETE FROM '  + self.database_name + '.cardinals WHERE cardinalId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -294,17 +382,24 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'cardinalIp' in payload and 'cardinalId' in payload:
+        if 'cardinalId' in payload:
             cursor = self.conn.cursor()
-            query = 'UPDATE chamberlain.cardinals SET cardinalIp =%s WHERE cardinalId=%s'
-            cursor.execute(query,( payload['cardinalIp'],payload['cardinalId'] ))
+            attributes = ['cardinalIp']
+            query = 'UPDATE ' + self.database_name + '.cardinals SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where cardinalId="' + payload['cardinalId'] + '"'
+
+            cursor.execute(query)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
 
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     # workflow relationship
     def insert_workflow_relationship(self, payload):
@@ -314,16 +409,22 @@ class DB:
                 payload: request payload  - dict
         """
 
-        if 'workflowRelationshipId' in payload and 'datasetId' in payload and 'workflowId' in payload:
+        cols = ['workflowRelationshipId', 'datasetId','workflowId','description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+        if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.workflowrelationships (workflowRelationshipId,datasetId,workflowId) VALUES (%s,%s,%s)'
-            cursor.execute(query, (payload['workflowRelationshipId'], payload['datasetId'], payload['workflowId']))
+            query = 'INSERT INTO ' + self.database_name + '.workflowRelationships ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_workflow_relationships(self):
         """
@@ -332,7 +433,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflowrelationships'
+        query = 'SELECT * FROM ' + self.database_name + '.workflowRelationships'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -347,7 +448,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.workflowRelationships WHERE workflowRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -362,12 +463,38 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.workflowrelationships WHERE workflowRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.workflowRelationships WHERE workflowRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
 
         return 'successful'
+
+    def modify_workflow_relationship(self, payload):
+        """
+            This function modifies worflow relationship in the MySQL chamberlain database
+            params:
+                payload: request payload  - dict
+        """
+
+        if 'workflowRelationshipId' in payload:
+            cursor = self.conn.cursor()
+            attributes = ['datasetId','workflowId','description']
+            query = 'UPDATE ' + self.database_name + '.workflowRelationships SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where workflowRelationshipId="' + payload['workflowRelationshipId'] + '"'
+
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successfull'
+
+        else:
+            raise Exception("request format not correct")
 
     # storage relationship
     def insert_storage_relationship(self, payload):
@@ -376,18 +503,22 @@ class DB:
             params:
                 payload: request payload  - dict
         """
-        cols = ['storageRelationshipId', 'datasetId', 'cardinalId1', 'cardinalId2', 'cardinalId3']
+        cols = ['storageRelationshipId', 'datasetId', 'cardinals', 'description']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
         flag = all([True for col in cols if col in payload])
         if flag:
             cursor = self.conn.cursor()
-            query = 'INSERT INTO chamberlain.storagerelationships (storageRelationshipId,datasetId,cardinalId1,cardinalId2,cardinalId3) VALUES (%s,%s,%s,%s,%s)'
-            cursor.execute(query, (payload['storageRelationshipId'], payload['datasetId'], payload['cardinalId1'], payload['cardinalId2'], payload['cardinalId3']))
+            query = 'INSERT INTO ' + self.database_name + '.storageRelationships ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
             self.conn.commit()
             cursor.close()
 
             return 'successfull'
         else:
-            return "request format not correct"
+            raise Exception("request format not correct")
 
     def get_storage_relationships(self):
         """
@@ -396,7 +527,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.storagerelationships'
+        query = 'SELECT * FROM ' + self.database_name + '.storageRelationships'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -411,7 +542,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM chamberlain.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -426,9 +557,35 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM chamberlain.storagerelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId="' + str(id) + '"'
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
 
         return 'successful'
+
+    def modify_storage_relationship(self, payload):
+        """
+            This function modifies storage relationship in the MySQL chamberlain database
+            params:
+                payload: request payload  - dict
+        """
+
+        if 'storageRelationshipId' in payload:
+            cursor = self.conn.cursor()
+            attributes = ['datasetId','cardinals','description']
+            query = 'UPDATE ' + self.database_name + '.storageRelationships SET '
+            for key,value in payload.items():
+                if key in attributes :
+                    query += key + '="' + value + '", '
+
+            query = query[:-2] + 'where storageRelationshipId="' + payload['storageRelationshipId'] + '"'
+
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successfull'
+
+        else:
+            raise Exception("request format not correct")
