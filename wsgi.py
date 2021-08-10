@@ -201,7 +201,6 @@ def handle_dataset_req():
         """
             Request format:
             {
-                "pid": 1,
                 "datasetId":"HRI101",
                 "datasetSchema": "age,location,height",
                 "backend":"backend-name",
@@ -556,7 +555,6 @@ def handle_storage_relationship_req():
         """
             Request format:
             {
-                "storageRelationshipId":"ST104",
                 "datasetId": "HRI007",
                 "cardinals":"cardinal023,cardinal346,cardinal541",
                 "description":"some description""
@@ -602,7 +600,7 @@ def handle_storage_relationship_req():
         """
             Request format:
             {
-                "storageRelationshipId":"SR109",
+                "storageRelationshipId":123,
                 "key": "value" 
             }
         """
