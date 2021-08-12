@@ -34,9 +34,44 @@ class DB:
         cardinalIds = storage_relationship[0][2].split(',')
         cardinalIps = self.get_cardinal_ips_from_ids(cardinalIds)
         owners = ['http://' + ip if 'http://' not in ip else ip for ip in cardinalIps]
-        owners = [(i+1, ip) for i, ip in enumerate(owners)]
+        owners = [(i+1, ip, cardinalIds[i]) for i, ip in enumerate(owners)]
 
         return owners
+
+    def get_running_jobs(self):
+        query = 'SELECT * from ' + self.database_name + '.runningJobs'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = list(cursor.fetchall())
+        cursor.close()
+
+        return result
+
+    def insert_running_job(self, payload):
+        """
+            This function will add a new running job on submission of a computation to chamberlain
+            params:
+                datasetId: which dataset to run the computation over
+                operation: which operation to run
+        """
+
+        cols = ['workflowName','cardinals', 'datasetId', 'operation']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+
+        if flag:
+            cursor = self.conn.cursor()
+            query = 'INSERT INTO ' + self.database_name + '.runningJobs ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successful'
+        else:
+            raise Exception("request format not correct")
 
     def get_storage_relationship_from_dataset_id(self, datasetId):
         """

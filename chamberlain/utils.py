@@ -7,14 +7,15 @@ import ast
 
 def orchestrate_computation(computation_settings, cardinal_DB):
     # GET IP addresses for dataset owners
-    # TODO: make this a call to postgres or mysql
     cardinals = request_data_owners(computation_settings['dataset_id'], cardinal_DB)
+    # add job to runningJobs table
+    computation_settings['workflow_name'] = add_running_job(computation_settings, cardinal_DB, cardinals)
     # get workflow source buckets and keys
     computation_settings['workflow_source_bucket'] , computation_settings['workflow_source_key'] = cardinal_DB.get_workflow_location_from_request(computation_settings['dataset_id'],computation_settings['operation'])
     # get datasets source bucket, source key and parameters
     computation_settings['dataset_parameters'] = cardinal_DB.get_dataset_parameters_from_dataset_id(computation_settings['dataset_id'])
 
-    PID1, IP1 = cardinals[0]
+    PID1, IP1, ID1 = cardinals[0]
     payload = {
         "workflow_name": computation_settings['workflow_name'],
         "dataset_id": computation_settings['dataset_id'],
@@ -22,10 +23,10 @@ def orchestrate_computation(computation_settings, cardinal_DB):
         "workflow_source_bucket": computation_settings['workflow_source_bucket'],
         "workflow_source_key": computation_settings['workflow_source_key'],
         "PID": PID1,
-        "other_cardinals": [x for x in cardinals if not x == (PID1, IP1)],
+        "other_cardinals": [x for x in cardinals if not x == (PID1, IP1, ID1)],
     }
     # instruct cardinal to start jiff server
-    r = requests.post(IP1 + '/api/start_jiff_server', json.dumps(payload),timeout=100)
+    r = requests.post(IP1 + '/api/start_jiff_server', json.dumps(payload), timeout=100)
     # print('TEXT --> ', r.text)
     if r.status_code != 200:
         error = r.json()
@@ -35,20 +36,17 @@ def orchestrate_computation(computation_settings, cardinal_DB):
     jiff_server_IP = body["JIFF_SERVER_IP"]
     # print('BODY --> ', body)
 
+    responses = []
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    future = asyncio.ensure_future(send_asynchronous_submits(cardinals, computation_settings, jiff_server_IP))
+    future = asyncio.ensure_future(send_asynchronous_submits(cardinals, computation_settings, jiff_server_IP, responses))
     loop.run_until_complete(future)
+    return responses
 
 
 def parse_computation_request(request_data):
     computation_settings = {}
     if request_data:
-        if 'workflow_name' in request_data:
-            computation_settings['workflow_name'] = request_data['workflow_name']
-        else:
-            raise Exception("Computation request does not contain a valid workflow_name (type: str)")
-
         if 'dataset_id' in request_data:
             computation_settings['dataset_id'] = request_data['dataset_id']
         else:
@@ -77,9 +75,26 @@ def request_data_owners(dataset_id, cardinal_DB):
         raise Exception("dataset_id is unknown or does not exist")
 
 
-async def send_asynchronous_submits(cardinals, computation_settings, jiff_server_IP): 
+def add_running_job(computation_settings, cardinal_DB, cardinals):
+    running_jobs = cardinal_DB.get_running_jobs()
+    workflow_name = f'workflow-{len(running_jobs)+1}'
+    cardinal_ids = [c[2] for c in cardinals]
+    job_payload = {
+        "workflowName": workflow_name,
+        "cardinals": ','.join(cardinal_ids),
+        "datasetId": computation_settings['dataset_id'],
+        "operation": computation_settings['operation']
+    }
+    try:
+        cardinal_DB.insert_running_job(job_payload)
+        return workflow_name
+    except Exception as e:
+        raise Exception(f'Error inserting new running job: {e}')
+
+
+async def send_asynchronous_submits(cardinals, computation_settings, jiff_server_IP, responses):
     ip_payload = []
-    for PID, IP in cardinals:
+    for PID, IP, ID in cardinals:
         payload = {
             "workflow_name": computation_settings['workflow_name'],
             "dataset_id": computation_settings['dataset_id'],
@@ -88,7 +103,7 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
             "workflow_source_bucket": computation_settings['workflow_source_bucket'],
             "workflow_source_key": computation_settings['workflow_source_key'],
             "PID": PID,
-            "other_cardinals": [x for x in cardinals if not x == (PID, IP)],
+            "other_cardinals": [x for x in cardinals if not x == (PID, IP, ID)],
             "jiff_server": jiff_server_IP
         }
 
@@ -103,6 +118,7 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
 
     # adapted from:
     # https://medium.com/hackernoon/how-to-run-asynchronous-web-requests-in-parallel-with-python-3-5-without-aiohttp-264dc0f8546
+    # responses = []
     with ThreadPoolExecutor(max_workers=3) as executor:
         # Set any session parameters here before calling `fetch`
         loop = asyncio.get_event_loop()
@@ -115,8 +131,9 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
             for x in ip_payload
         ]
         for response in await asyncio.gather(*tasks):
-            pass
+            responses += [response]
 
+    # return responses
 
 def send_submit(ip, payload):
     response = {"MSG": "ERR"}
