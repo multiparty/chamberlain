@@ -18,6 +18,14 @@ const routes: Routes = [
   {
     path: 'datasets',
     loadChildren: () => import('./datasets/datasets.module').then( m => m.DatasetsPageModule)
+  },
+  {
+    path: 'workflows',
+    loadChildren: () => import('./workflows/workflows.module').then( m => m.WorkflowsPageModule)
+  },
+  {
+    path: 'cardinals',
+    loadChildren: () => import('./cardinals/cardinals.module').then( m => m.CardinalsPageModule)
   }
 ];
 

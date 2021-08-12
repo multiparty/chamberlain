@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { DatasetsPageRoutingModule } from './datasets-routing.module';
+import { CardinalsPageRoutingModule } from './cardinals-routing.module';
 
-import { DatasetsPage } from './datasets.page';
+import { CardinalsPage } from './cardinals.page';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 @NgModule({
@@ -14,11 +14,9 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
     CommonModule,
     FormsModule,
     IonicModule,
-    DatasetsPageRoutingModule,
+    CardinalsPageRoutingModule,
     NgxDatatableModule
   ],
-  declarations: [
-    DatasetsPage
-  ]
+  declarations: [CardinalsPage]
 })
-export class DatasetsPageModule {}
+export class CardinalsPageModule {}

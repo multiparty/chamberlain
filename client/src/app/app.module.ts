@@ -7,12 +7,12 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
-import { AddComponent } from './components/add/add.component';
+// import { AddComponent } from './components/add/add.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    AddComponent,
+    // AddComponent,
   ],
   entryComponents: [],
   imports: [

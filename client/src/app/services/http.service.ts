@@ -67,6 +67,22 @@ export class HttpService {
     );
   }
 
+  /* * * * * * */
+  /* CARDINALS  */
+  /* * * * * * */
+
+  getAllCardinals() {
+    return this.http.get(this.serverUrl + '/api/cardinal').pipe(
+      catchError(val => of(val)),
+    );
+  }
+
+  getOneCardinal(id) {
+    return this.http.get(this.serverUrl + `/api/cardinal/${id}`).pipe(
+      catchError(val => of(val)),
+    );
+  }
+
 }
 
 
