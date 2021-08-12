@@ -14,15 +14,14 @@
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
+  <div class="container">
     <strong class="capitalize">View all available datasets</strong>
-<!--    <app-table [headers]="headers" [data]="data"></app-table>-->
     <br>
     <ngx-datatable
       class="material"
       [limit]="8"
       [rows]="rows"
-      [rowHeight]="50"
+      [rowHeight]="'auto'"
       [columns]="columns"
       [columnMode]="'force'"
       [sortType]="'multi'"

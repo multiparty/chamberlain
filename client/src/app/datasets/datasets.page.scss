@@ -2,27 +2,30 @@ ion-menu-button {
   color: var(--ion-color-primary);
 }
 
-#container {
+.container {
   padding: 5%;
 }
 
 
-#container strong {
+.container strong {
   font-size: 20px;
   line-height: 26px;
 }
 
-#container p {
+.container p {
   font-size: 16px;
   line-height: 22px;
   color: #8c8c8c;
   margin: 0;
 }
 
-#container a {
+.container a {
   text-decoration: none;
 }
 
-ngx-datatable {
-  margin-top: 2%;
+.error-card {
+  background-color: #ffe3e3;
+  p {
+    color: black;
+  }
 }

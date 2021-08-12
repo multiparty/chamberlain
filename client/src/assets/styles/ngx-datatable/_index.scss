@@ -4,6 +4,10 @@
   justify-content: center;
   position: relative;
   transform: translate3d(0, 0, 0);
+  margin-top: 2%;
+  .material {
+    overflow-wrap: break-word;
+  }
 
   [hidden] {
     display: none !important;
