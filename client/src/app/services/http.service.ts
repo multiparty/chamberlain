@@ -83,6 +83,17 @@ export class HttpService {
     );
   }
 
+  /* * * * * */
+  /* COMPUTE */
+  /* * * * * */
+
+  submitComputation(submit_request) {
+    return this.http.post(this.serverUrl + `/api/submit`, submit_request).pipe(
+
+      catchError(val => of(val)),
+    );
+  }
+
 }
 
 

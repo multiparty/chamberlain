@@ -14,7 +14,7 @@
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
+  <div class="container">
     <strong class="capitalize">Run a computation</strong>
     <p>
       If your dataset and workflow information have been added to the Chamberlain system, you can now run computations
@@ -36,17 +36,28 @@
           </ion-item>
           <ion-item>
             <ion-label>Operation</ion-label>
-            <ion-select mode="ios" interface="popover" value="{{operations[currentDataset][0]}}">
+            <ion-select [(ngModel)]="currentOp" mode="ios" interface="popover" value="{{operations[currentDataset][0]}}" name="operation">
               <ion-select-option *ngFor="let op of operations[currentDataset];" value="{{op}}">{{op}}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item>
             <ion-label>Number of parties</ion-label>
-            <ion-input type="number" name="description"></ion-input>
+            <ion-input [(ngModel)]="numParties" type="number" name="num_parties"></ion-input>
           </ion-item>
 
-          <ion-button style="float: right; margin: 1%;" type="submit">Submit</ion-button>
+          <ion-button *ngIf="!isWaiting" style="float: right; margin: 1%;" type="submit" (click)="submitComputation()">Submit</ion-button>
+          <ion-button *ngIf="isWaiting" disabled style="float: right; margin: 1%;"><ion-spinner></ion-spinner></ion-button>
         </form>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="errorMsg !== ''" class="error-card">
+      <ion-card-content>
+        <p>{{errorMsg}}</p>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="successMsg !== ''" class="success-card">
+      <ion-card-content>
+        <p>{{successMsg}}</p>
       </ion-card-content>
     </ion-card>
   </div>
