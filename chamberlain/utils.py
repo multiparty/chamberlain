@@ -12,8 +12,7 @@ def orchestrate_computation(computation_settings, cardinal_DB):
     # get workflow source buckets and keys
     computation_settings['workflow_source_bucket'] , computation_settings['workflow_source_key'] = cardinal_DB.get_workflow_location_from_request(computation_settings['dataset_id'],computation_settings['operation'])
     # get datasets source bucket, source key and parameters
-    dataset_parameters = cardinal_DB.get_dataset_info_from_dataset_id(computation_settings['dataset_id'],computation_settings['party_count'])
-    computation_settings['dataset_parameters'] = {pid:(parameters) for pid,parameters in dataset_parameters}
+    computation_settings['dataset_parameters'] = cardinal_DB.get_dataset_parameters_from_dataset_id(computation_settings['dataset_id'])
 
     PID1, IP1 = cardinals[0]
     payload = {
@@ -94,7 +93,7 @@ async def send_asynchronous_submits(cardinals, computation_settings, jiff_server
         }
 
         try:
-            parameters = computation_settings['dataset_parameters'][PID]
+            parameters = computation_settings['dataset_parameters']
             parameters = ast.literal_eval(parameters.replace('false','False').replace('true','True').replace("ZP","zp"))
             payload.update(parameters)
         except:
