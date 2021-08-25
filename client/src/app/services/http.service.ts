@@ -87,6 +87,12 @@ export class HttpService {
   /* COMPUTE */
   /* * * * * */
 
+  getAllRunningJobs() {
+    return this.http.get(this.serverUrl + '/api/running-jobs').pipe(
+      catchError(val => of(val)),
+    );
+  }
+
   submitComputation(submit_request) {
     return this.http.post(this.serverUrl + `/api/submit`, submit_request).pipe(
 

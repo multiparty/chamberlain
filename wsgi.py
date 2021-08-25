@@ -661,6 +661,57 @@ def handle_storage_relationship_id_req(id):
         return jsonify(response)
 
 
+# ------------------ #
+# RUNNING JOBS TABLE #
+# ------------------ #
+
+@app.route("/api/running-jobs", methods=["GET", "PUT"])
+def handle_running_jobs_req():
+    if request.method == "GET":
+        try:
+            running_jobs = cardinal_DB.get_running_jobs()
+            response = {
+                "running_jobs": running_jobs
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": str(e)
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+    # handle the PUT request
+    elif request.method == "PUT":
+        """
+            Request format:
+            {
+                "workflow_name":<string>",
+                "cpu_usage": <float> (optional),
+                "memory_usage": <float> (optional)
+            }
+        """
+        try:
+            request_data = request.get_json()
+            response_msg = cardinal_DB.add_stats_to_running_job(request_data)
+            response = {
+                "MSG": response_msg
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": str(e)
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+
 if __name__ != "__main__":
 
     gunicorn_logger = logging.getLogger("gunicorn.error")

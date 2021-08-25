@@ -8,8 +8,8 @@ import { HttpService } from '../services/http.service';
 })
 export class DatasetsPage implements OnInit {
 
+  // data table variables
   private rows: any;
-
   private columns = [
     { name: 'Dataset ID', prop: 'datasetId'},
     { name: 'Schema', prop: 'schema'},
@@ -47,17 +47,14 @@ export class DatasetsPage implements OnInit {
 
   formatTableData(datasets, storageRels, workflowRels) {
     // Dataset ID | Schema | Compatible Workflows | Locations
-    console.log(datasets);
-    console.log(storageRels);
-    console.log(workflowRels);
-    const uniqueIds = [...new Set(datasets.map(ds => ds[2]))];
+    const uniqueIds = [...new Set(datasets.map(ds => ds[1]))];
     const objects = [];
 
     for (const id of uniqueIds) {
       objects.push(
         {
           datasetId: id,
-          schema: datasets.filter(ds => ds[2] === id)[0][3],
+          schema: datasets.filter(ds => ds[1] === id)[0][2],
           workflows: workflowRels.filter(wk => wk[1] === id).map(wk => wk[2]).join(),
           locations: storageRels.filter(st => st[1] === id)[0][2]
         }

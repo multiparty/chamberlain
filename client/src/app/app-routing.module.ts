@@ -26,6 +26,10 @@ const routes: Routes = [
   {
     path: 'cardinals',
     loadChildren: () => import('./cardinals/cardinals.module').then( m => m.CardinalsPageModule)
+  },
+  {
+    path: 'analytics',
+    loadChildren: () => import('./analytics/analytics.module').then( m => m.AnalyticsPageModule)
   }
 ];
 

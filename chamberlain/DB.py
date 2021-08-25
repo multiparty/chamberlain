@@ -73,6 +73,58 @@ class DB:
         else:
             raise Exception("request format not correct")
 
+    def add_stats_to_running_job(self, payload):
+        if 'workflow_name' in payload:
+            stats_attributes = ['cardinals', 'cpuUsage', 'memoryUsage', 'submittedStats']
+
+            select_query = 'SELECT ' + ','.join(stats_attributes) + ' FROM ' + self.database_name +\
+                '.runningJobs WHERE workflowName = "' + payload['workflow_name'] + '"'
+            cursor = self.conn.cursor()
+            cursor.execute(select_query)
+            select_result = list(cursor.fetchall())[0]
+            num_cardinals = len(select_result[0].split(','))
+            num_submitted = select_result[3]
+            if num_submitted >= num_cardinals:
+                raise Exception("Already reached max number of stats submissions for this workflow")
+
+            if 'cpu_usage' not in payload and 'memory_usage' not in payload:
+                raise Exception("No fields given to update")
+
+            update_clause = 'UPDATE ' + self.database_name + '.runningJobs SET '
+            where_clause = ' WHERE workflowName = "' + payload['workflow_name'] + '"'
+            if 'cpu_usage' in payload:
+                if num_submitted == 0:
+                    set_query = update_clause + 'cpuUsage = ' + str(payload['cpu_usage']) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+                else:
+                    prior = select_result[1] * num_submitted
+                    new_avg = (prior + payload['cpu_usage'])/(num_submitted+1)
+                    set_query = update_clause + 'cpuUsage = ' + str(new_avg) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+
+            if 'memory_usage' in payload:
+                if num_submitted == 0:
+                    set_query = update_clause + 'memoryUsage = ' + str(payload['memory_usage']) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+                else:
+                    prior = select_result[2] * num_submitted
+                    new_avg = (prior + payload['memory_usage'])/(num_submitted+1)
+                    set_query = update_clause + 'memoryUsage = ' + str(new_avg) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+
+            update_submitted = update_clause + 'submittedStats = ' + str(num_submitted+1) + where_clause
+            cursor.execute(update_submitted)
+            self.conn.commit()
+            cursor.close()
+            return 'successful'
+
+        else:
+            raise Exception("Workflow name missing from payload")
+
     def get_storage_relationship_from_dataset_id(self, datasetId):
         """
             This function will search the storage relationship table by datasetId and return the result
