@@ -52,7 +52,7 @@ COLLATE = utf8_bin;
 -- Table `chamberlain`.`storageRelationships`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chamberlain`.`storageRelationships` (
-  `storageRelationshipId` VARCHAR(45) NOT NULL,
+  `storageRelationshipId` INT NOT NULL AUTO_INCREMENT,
   `datasetId` VARCHAR(45) NULL DEFAULT NULL,
   `cardinals` VARCHAR(1000) NULL DEFAULT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
@@ -66,7 +66,7 @@ COLLATE = utf8_bin;
 -- Table `chamberlain`.`workflowRelationships`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chamberlain`.`workflowRelationships` (
-  `workflowRelationshipId` VARCHAR(45) NOT NULL,
+  `workflowRelationshipId` INT NOT NULL AUTO_INCREMENT,
   `datasetId` VARCHAR(45) NULL DEFAULT NULL,
   `workflowId` VARCHAR(45) NULL DEFAULT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
