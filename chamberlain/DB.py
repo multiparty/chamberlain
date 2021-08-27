@@ -1,7 +1,9 @@
+import os
+import json
 import time
 import mysql.connector
+from datetime import datetime
 from dotenv import load_dotenv
-import os
 
 
 class DB:
@@ -115,6 +117,26 @@ class DB:
                     set_query = update_clause + 'memoryUsage = ' + str(new_avg) + where_clause
                     cursor.execute(set_query)
                     self.conn.commit()
+
+            if 'timestamps' in payload:
+                times_json = json.loads(payload['timestamps'])
+                if 'jiff_server_launched' in times_json:
+                    start = times_json['jiff_server_launched']
+                else:
+                    start = times_json['service_ip_retrieved']
+
+                remaining_keys = ['exchanged_ips', 'built_specs_configs', 'launched_config', 'launched_pod', 'pod_succeeded', 'workflow_stopped']
+                end = ''
+                for k in remaining_keys:
+                    if times_json[k] is not None:
+                        end = times_json[k]
+                if end != '':
+                    diff = timestamp_difference(start, end, '%H:%M:%S')
+                else:
+                    diff = ''
+                set_query = update_clause + 'runTime = ' + str(diff) + where_clause
+                cursor.execute(set_query)
+                self.conn.commit()
 
             update_submitted = update_clause + 'submittedStats = ' + str(num_submitted+1) + where_clause
             cursor.execute(update_submitted)
@@ -674,3 +696,19 @@ class DB:
 
         else:
             raise Exception("request format not correct")
+
+
+# helper to find difference between two timestamps
+def timestamp_difference(start, end, fmt):
+    # fmt = '%Y-%m-%d %H:%M:%S'
+    tstamp1 = datetime.strptime(start, fmt)
+    tstamp2 = datetime.strptime(end, fmt)
+
+    if tstamp1 > tstamp2:
+        td = tstamp1 - tstamp2
+    else:
+        td = tstamp2 - tstamp1
+    td_mins = round(td.total_seconds() / 60, 4)
+
+    # print('The difference is approx. %s minutes' % td_mins)
+    return td_mins
