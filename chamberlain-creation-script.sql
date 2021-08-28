@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `chamberlain`.`runningJobs` (
   `cpuUsage` FLOAT(11) NULL DEFAULT NULL,
   `memoryUsage` FLOAT(11) NULL DEFAULT NULL,
   `runTime` FLOAT(11) NULL DEFAULT NULL,
-  `submittedStats` INT NULL DEFAULT NULL,
+  `submittedStats` INT NULL DEFAULT 0,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
 AUTO_INCREMENT = 7
