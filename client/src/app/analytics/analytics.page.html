@@ -1,0 +1,55 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Analytics</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Analytics</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="container">
+    <ion-row>
+      <ion-col>
+        <strong class="capitalize">View stats on past jobs</strong>
+      </ion-col>
+    </ion-row>
+
+    <ngx-datatable
+      class="material"
+      [limit]="8"
+      [rows]="rows"
+      [rowHeight]="'auto'"
+      [columns]="columns"
+      [columnMode]="'force'"
+      [sortType]="'multi'"
+      [headerHeight]="50"
+      [footerHeight]="50">
+    </ngx-datatable>
+  </div>
+  <div class="container">
+    <ion-row>
+      <ion-col>
+        <strong class="capitalize">View aggregate statistics</strong>
+      </ion-col>
+    </ion-row>
+
+    <ngx-datatable
+      class="material"
+      [limit]="8"
+      [rows]="aggRows"
+      [rowHeight]="'auto'"
+      [columns]="aggColumns"
+      [columnMode]="'force'"
+      [sortType]="'multi'"
+      [headerHeight]="50"
+      [footerHeight]="50">
+    </ngx-datatable>
+  </div>
+</ion-content>

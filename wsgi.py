@@ -201,7 +201,6 @@ def handle_dataset_req():
         """
             Request format:
             {
-                "pid": 1,
                 "datasetId":"HRI101",
                 "datasetSchema": "age,location,height",
                 "backend":"backend-name",
@@ -556,7 +555,6 @@ def handle_storage_relationship_req():
         """
             Request format:
             {
-                "storageRelationshipId":"ST104",
                 "datasetId": "HRI007",
                 "cardinals":"cardinal023,cardinal346,cardinal541",
                 "description":"some description""
@@ -602,7 +600,7 @@ def handle_storage_relationship_req():
         """
             Request format:
             {
-                "storageRelationshipId":"SR109",
+                "storageRelationshipId":123,
                 "key": "value" 
             }
         """
@@ -648,6 +646,57 @@ def handle_storage_relationship_id_req(id):
     elif request.method == "DELETE":
         try:
             response_msg = cardinal_DB.delete_storage_relationship(id)
+            response = {
+                "MSG": response_msg
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": str(e)
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+
+# ------------------ #
+# RUNNING JOBS TABLE #
+# ------------------ #
+
+@app.route("/api/running-jobs", methods=["GET", "PUT"])
+def handle_running_jobs_req():
+    if request.method == "GET":
+        try:
+            running_jobs = cardinal_DB.get_running_jobs()
+            response = {
+                "running_jobs": running_jobs
+            }
+
+        except Exception as e:
+            print(e)
+            response = {
+                "ERR": str(e)
+            }
+            app.logger.error(f"Error sending request: {e}")
+            return jsonify(response)
+
+        return jsonify(response)
+
+    # handle the PUT request
+    elif request.method == "PUT":
+        """
+            Request format:
+            {
+                "workflow_name":<string>",
+                "cpu_usage": <float> (optional),
+                "memory_usage": <float> (optional)
+            }
+        """
+        try:
+            request_data = request.get_json()
+            response_msg = cardinal_DB.add_stats_to_running_job(request_data)
             response = {
                 "MSG": response_msg
             }

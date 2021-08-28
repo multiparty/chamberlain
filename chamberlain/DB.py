@@ -1,7 +1,9 @@
+import os
+import json
 import time
 import mysql.connector
+from datetime import datetime
 from dotenv import load_dotenv
-import os
 
 
 class DB:
@@ -34,9 +36,116 @@ class DB:
         cardinalIds = storage_relationship[0][2].split(',')
         cardinalIps = self.get_cardinal_ips_from_ids(cardinalIds)
         owners = ['http://' + ip if 'http://' not in ip else ip for ip in cardinalIps]
-        owners = [(i+1, ip) for i, ip in enumerate(owners)]
+        owners = [(i+1, ip, cardinalIds[i]) for i, ip in enumerate(owners)]
 
         return owners
+
+    def get_running_jobs(self):
+        query = 'SELECT * from ' + self.database_name + '.runningJobs'
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        result = list(cursor.fetchall())
+        cursor.close()
+
+        return result
+
+    def insert_running_job(self, payload):
+        """
+            This function will add a new running job on submission of a computation to chamberlain
+            params:
+                datasetId: which dataset to run the computation over
+                operation: which operation to run
+        """
+
+        cols = ['workflowName','cardinals', 'datasetId', 'operation']
+        identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
+        columns_str = '(' + ','.join(cols) + ')'
+
+        flag = all([True for col in cols if col in payload])
+
+        if flag:
+            cursor = self.conn.cursor()
+            query = 'INSERT INTO ' + self.database_name + '.runningJobs ' + columns_str + ' VALUES ' + identifier_str
+            values_tuple = tuple([payload[col] for col in cols])
+            cursor.execute(query, values_tuple)
+            self.conn.commit()
+            cursor.close()
+
+            return 'successful'
+        else:
+            raise Exception("request format not correct")
+
+    def add_stats_to_running_job(self, payload):
+        if 'workflow_name' in payload:
+            stats_attributes = ['cardinals', 'cpuUsage', 'memoryUsage', 'submittedStats']
+
+            select_query = 'SELECT ' + ','.join(stats_attributes) + ' FROM ' + self.database_name +\
+                '.runningJobs WHERE workflowName = "' + payload['workflow_name'] + '"'
+            cursor = self.conn.cursor()
+            cursor.execute(select_query)
+            select_result = list(cursor.fetchall())[0]
+            num_cardinals = len(select_result[0].split(','))
+            num_submitted = select_result[3]
+            if num_submitted >= num_cardinals:
+                raise Exception("Already reached max number of stats submissions for this workflow")
+
+            if 'cpu_usage' not in payload and 'memory_usage' not in payload:
+                raise Exception("No fields given to update")
+
+            update_clause = 'UPDATE ' + self.database_name + '.runningJobs SET '
+            where_clause = ' WHERE workflowName = "' + payload['workflow_name'] + '"'
+            if 'cpu_usage' in payload:
+                if num_submitted == 0:
+                    set_query = update_clause + 'cpuUsage = ' + str(payload['cpu_usage']) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+                else:
+                    prior = select_result[1] * num_submitted
+                    new_avg = (prior + payload['cpu_usage'])/(num_submitted+1)
+                    set_query = update_clause + 'cpuUsage = ' + str(new_avg) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+
+            if 'memory_usage' in payload:
+                if num_submitted == 0:
+                    set_query = update_clause + 'memoryUsage = ' + str(payload['memory_usage']) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+                else:
+                    prior = select_result[2] * num_submitted
+                    new_avg = (prior + payload['memory_usage'])/(num_submitted+1)
+                    set_query = update_clause + 'memoryUsage = ' + str(new_avg) + where_clause
+                    cursor.execute(set_query)
+                    self.conn.commit()
+
+            if 'timestamps' in payload:
+                times_json = json.loads(payload['timestamps'])
+                if 'jiff_server_launched' in times_json:
+                    start = times_json['jiff_server_launched']
+                else:
+                    start = times_json['service_ip_retrieved']
+
+                remaining_keys = ['exchanged_ips', 'built_specs_configs', 'launched_config', 'launched_pod', 'pod_succeeded', 'workflow_stopped']
+                end = ''
+                for k in remaining_keys:
+                    if times_json[k] is not None:
+                        end = times_json[k]
+                if end != '':
+                    diff = timestamp_difference(start, end, '%H:%M:%S')
+                else:
+                    diff = ''
+                set_query = update_clause + 'runTime = ' + str(diff) + where_clause
+                cursor.execute(set_query)
+                self.conn.commit()
+
+            update_submitted = update_clause + 'submittedStats = ' + str(num_submitted+1) + where_clause
+            cursor.execute(update_submitted)
+            self.conn.commit()
+            cursor.close()
+            return 'successful'
+
+        else:
+            raise Exception("Workflow name missing from payload")
 
     def get_storage_relationship_from_dataset_id(self, datasetId):
         """
@@ -96,21 +205,19 @@ class DB:
 
         return query_output
 
-    def get_dataset_info_from_dataset_id(self, dataset_id,num_parties):
+    def get_dataset_parameters_from_dataset_id(self, dataset_id):
         """
             This function will return dataset bucket and key from dataset id for all parties
             params:
                 dataset_id: dataset id
-                num_parties: number of parties
             returns:
-                list of tuples of (pid,dataset_source_bucket,dataset_source_key,parameters)
+                list of tuples of (parameters)
         """
 
-        pid_str = '(' + ','.join([str(i+1) for i in range(num_parties) ]) + ')'
-        query = 'Select pid,parameters from ' + self.database_name + '.datasets where datasetId="' + dataset_id + '" and pid in ' + pid_str
+        query = 'Select parameters from ' + self.database_name + '.datasets where datasetId="' + dataset_id + '"'
         cursor = self.conn.cursor()
         cursor.execute(query)
-        query_output = list(cursor.fetchall())
+        query_output = list(cursor.fetchall())[0][0]
         cursor.close()
 
         return query_output
@@ -219,7 +326,7 @@ class DB:
                 payload: request payload  - dict
         """
 
-        cols = ['pid','datasetId', 'datasetSchema','backend','parameters','description']
+        cols = ['datasetId', 'datasetSchema','backend','parameters','description']
         identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
         columns_str = '(' + ','.join(cols) + ')'
 
@@ -503,7 +610,7 @@ class DB:
             params:
                 payload: request payload  - dict
         """
-        cols = ['storageRelationshipId', 'datasetId', 'cardinals', 'description']
+        cols = ['datasetId', 'cardinals', 'description']
         identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
         columns_str = '(' + ','.join(cols) + ')'
 
@@ -542,7 +649,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'SELECT * FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'SELECT * FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId=' + str(id)
         cursor.execute(query)
         data = list(cursor.fetchall())
         cursor.close()
@@ -557,7 +664,7 @@ class DB:
         """
 
         cursor = self.conn.cursor()
-        query = 'DELETE FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId="' + str(id) + '"'
+        query = 'DELETE FROM ' + self.database_name + '.storageRelationships WHERE storageRelationshipId=' + str(id)
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
@@ -579,7 +686,7 @@ class DB:
                 if key in attributes :
                     query += key + '="' + value + '", '
 
-            query = query[:-2] + 'where storageRelationshipId="' + payload['storageRelationshipId'] + '"'
+            query = query[:-2] + 'where storageRelationshipId=' + str(payload['storageRelationshipId'])
 
             cursor.execute(query)
             self.conn.commit()
@@ -589,3 +696,19 @@ class DB:
 
         else:
             raise Exception("request format not correct")
+
+
+# helper to find difference between two timestamps
+def timestamp_difference(start, end, fmt):
+    # fmt = '%Y-%m-%d %H:%M:%S'
+    tstamp1 = datetime.strptime(start, fmt)
+    tstamp2 = datetime.strptime(end, fmt)
+
+    if tstamp1 > tstamp2:
+        td = tstamp1 - tstamp2
+    else:
+        td = tstamp2 - tstamp1
+    td_mins = round(td.total_seconds() / 60, 4)
+
+    # print('The difference is approx. %s minutes' % td_mins)
+    return td_mins

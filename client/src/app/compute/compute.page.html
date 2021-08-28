@@ -1,0 +1,64 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Compute</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Compute</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="container">
+    <strong class="capitalize">Run a computation</strong>
+    <p>
+      If your dataset and workflow information have been added to the Chamberlain system, you can now run computations
+      over them. Please enter which dataset and workflow you would like to work with and press "Submit" to start. Make
+      sure to wait for your result location to appear below before moving away from this page.
+    </p>
+    <br>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title><strong>Submit Request</strong></ion-card-title>
+      </ion-card-header>
+      <ion-card-content align="center">
+        <form>
+          <ion-item>
+            <ion-label>Dataset</ion-label>
+            <ion-select [(ngModel)]="currentDataset" mode="ios" interface="popover" value="{{datasets[0]}}" name="dataset">
+              <ion-select-option *ngFor="let ds of datasets;" value="{{ds}}">{{ds}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label>Operation</ion-label>
+            <ion-select [(ngModel)]="currentOp" mode="ios" interface="popover" value="{{operations[currentDataset][0]}}" name="operation">
+              <ion-select-option *ngFor="let op of operations[currentDataset];" value="{{op}}">{{op}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label>Number of parties</ion-label>
+            <ion-input [(ngModel)]="numParties" type="number" name="num_parties"></ion-input>
+          </ion-item>
+
+          <ion-button *ngIf="!isWaiting" style="float: right; margin: 1%;" type="submit" (click)="submitComputation()">Submit</ion-button>
+          <ion-button *ngIf="isWaiting" disabled style="float: right; margin: 1%;"><ion-spinner></ion-spinner></ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="errorMsg !== ''" class="error-card">
+      <ion-card-content>
+        <p>{{errorMsg}}</p>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="successMsg !== ''" class="success-card">
+      <ion-card-content>
+        <p>{{successMsg}}</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
