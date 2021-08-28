@@ -93,6 +93,25 @@ AUTO_INCREMENT = 7
 DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_bin;
 
+-- -----------------------------------------------------
+-- Table `chamberlain`.`runningJobs`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `chamberlain`.`runningJobs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `workflowName` VARCHAR(45) NULL DEFAULT NULL,
+  `cardinals` VARCHAR(1000) NULL DEFAULT NULL,
+  `datasetId` VARCHAR(45) NULL DEFAULT NULL,
+  `operation` VARCHAR(45) NULL DEFAULT NULL,
+  `cpuUsage` FLOAT(11) NULL DEFAULT NULL,
+  `memoryUsage` FLOAT(11) NULL DEFAULT NULL,
+  `runTime` FLOAT(11) NULL DEFAULT NULL,
+  `submittedStats` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 7
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_bin;
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
