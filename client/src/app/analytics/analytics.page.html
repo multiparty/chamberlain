@@ -33,4 +33,23 @@
       [footerHeight]="50">
     </ngx-datatable>
   </div>
+  <div class="container">
+    <ion-row>
+      <ion-col>
+        <strong class="capitalize">View aggregate statistics</strong>
+      </ion-col>
+    </ion-row>
+
+    <ngx-datatable
+      class="material"
+      [limit]="8"
+      [rows]="aggRows"
+      [rowHeight]="'auto'"
+      [columns]="aggColumns"
+      [columnMode]="'force'"
+      [sortType]="'multi'"
+      [headerHeight]="50"
+      [footerHeight]="50">
+    </ngx-datatable>
+  </div>
 </ion-content>

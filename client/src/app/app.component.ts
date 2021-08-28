@@ -10,7 +10,7 @@ export class AppComponent {
     { title: 'Workflows', url: '/workflows', icon: 'reader' },
     { title: 'Cardinals', url: '/cardinals', icon: 'cloud' },
     { title: 'Compute', url: '/compute', icon: 'calculator' },
-    { title: 'Analytics', url: '/analytics', icon: 'analytics' },
+    { title: 'Analytics', url: '/analytics', icon: 'bar-chart' },
   ];
   constructor() {}
 }
