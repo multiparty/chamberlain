@@ -21,10 +21,12 @@ USE `chamberlain` ;
 -- Table `chamberlain`.`cardinals`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chamberlain`.`cardinals` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `cardinalId` VARCHAR(45) NOT NULL,
   `cardinalIp` VARCHAR(1000) NULL DEFAULT NULL,
   `description` VARCHAR(1000) NULL DEFAULT NULL,
-  PRIMARY KEY (`cardinalId`))
+  `destination` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_bin;
@@ -35,7 +37,6 @@ COLLATE = utf8_bin;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chamberlain`.`datasets` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `pid` INT NULL DEFAULT NULL,
   `datasetId` VARCHAR(45) NULL DEFAULT NULL,
   `datasetSchema` VARCHAR(1000) NULL DEFAULT NULL,
   `backend` VARCHAR(1000) NULL DEFAULT NULL,

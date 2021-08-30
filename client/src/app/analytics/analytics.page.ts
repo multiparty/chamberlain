@@ -48,7 +48,7 @@ export class AnalyticsPage implements OnInit {
         workflowName: job[1],
         cpuUsage: job[5],
         memoryUsage: job[6],
-        runTime: job[8]
+        runTime: job[7]
       })
     }
     return objects;

@@ -24,15 +24,9 @@ class DB:
             self.database_name = os.environ.get('MYSQL_DB')
             self.db_schema = {}
             self.get_tables_columns()
-            self.type_2_identifier = {
-                'varchar': "%s",
-                'int':"%d",
-                'tinyint':"%d"
-            }
 
         except Exception as e:
             print(e)
-
 
     def get_tables_columns(self):
 
@@ -59,7 +53,6 @@ class DB:
         else:
             raise Exception('File format not supported')
 
-
         table_name = ""
         # match column names
         for table,columns in self.db_schema.items():
@@ -78,18 +71,14 @@ class DB:
         records = [tuple(x) for x in df.to_records(index=False)]
 
         columns_str = '(' + ','.join(df.columns) + ')'
-        identifiers_str = '(' + ','.join([self.type_2_identifier[col[1]] for col in self.db_schema[table_name][1:]]) + ')'
+        identifiers_str = '(' + ','.join(['%s' for _ in df.columns]) + ')'
         query = 'INSERT IGNORE INTO ' + self.database_name + '.' + table_name + ' ' + columns_str + ' VALUES ' + identifiers_str
-
 
         cursor = self.conn.cursor()
         cursor.executemany(query,records)
         self.conn.commit()
         cursor.close()
         print('INSERTED SUCCESSFULLY!')
-
-
-
 
 
 if __name__ == "__main__":

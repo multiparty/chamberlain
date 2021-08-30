@@ -245,7 +245,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
         else:
             raise Exception("request format not correct")
 
@@ -313,7 +313,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
 
         else:
             raise Exception("request format not correct")
@@ -339,7 +339,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
         else:
             raise Exception("request format not correct")
 
@@ -408,7 +408,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
 
         else:
             raise Exception("request format not correct")
@@ -421,7 +421,7 @@ class DB:
                 payload: request payload  - dict
         """
 
-        cols = ['cardinalId', 'cardinalIp','description']
+        cols = ['cardinalId', 'cardinalIp','description', 'destination']
         identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
         columns_str = '(' + ','.join(cols) + ')'
 
@@ -434,7 +434,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
         else:
             raise Exception("request format not correct")
 
@@ -503,7 +503,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
 
         else:
             raise Exception("request format not correct")
@@ -516,7 +516,7 @@ class DB:
                 payload: request payload  - dict
         """
 
-        cols = ['workflowRelationshipId', 'datasetId','workflowId','description']
+        cols = ['datasetId','workflowId','description']
         identifier_str = '(' + ','.join(['%s' for i in range(len(cols))]) + ')'
         columns_str = '(' + ','.join(cols) + ')'
 
@@ -529,7 +529,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
         else:
             raise Exception("request format not correct")
 
@@ -598,7 +598,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
 
         else:
             raise Exception("request format not correct")
@@ -623,7 +623,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
         else:
             raise Exception("request format not correct")
 
@@ -692,7 +692,7 @@ class DB:
             self.conn.commit()
             cursor.close()
 
-            return 'successfull'
+            return 'successful'
 
         else:
             raise Exception("request format not correct")
